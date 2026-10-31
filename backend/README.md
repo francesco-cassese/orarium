@@ -5,7 +5,7 @@ nella radice del repository.
 
 ## Requisiti
 
-- PHP 8.3-8.5 (testato con 8.4)
+- PHP 8.4-8.5 (testato con 8.4)
 - Composer
 - Docker Desktop
 
@@ -64,6 +64,11 @@ Dalla radice:
 Dalla cartella `backend/`:
 - `php artisan migrate:status`: mostra le migrazioni eseguite e verifica il collegamento al database.
 - `php artisan serve`: avvia il server di sviluppo su `http://localhost:8000`.
+- `composer check`: esegue in sequenza formattazione, analisi statica e test. È il controllo da lanciare prima di aprire una pull request: la CI lo rifarà.
+- `composer test`: esegue i test con Pest, dopo aver pulito la cache della configurazione.
+- `composer format`: formatta il codice con Pint.
+- `composer format:check`: verifica la formattazione senza modificare i file. Se fallisce, lancia `composer format` e riprova.
+- `composer analyse`: esegue l'analisi statica con Larastan.
 
 ## Collegarsi al database con un client
 
