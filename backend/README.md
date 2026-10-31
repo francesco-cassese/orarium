@@ -5,17 +5,35 @@ nella radice del repository.
 
 ## Requisiti
 
-- PHP 8.3 o superiore
+- PHP 8.3-8.5 (testato con 8.4)
 - Composer
 - Docker Desktop
 
 ## Primo avvio
 
+### 1. Nella radice del repository: database e Redis
+
+1. Copia il file di esempio:
+   ```
+   cp .env.example .env
+   ```
+2. Apri `.env` e scegli le password per `MYSQL_ROOT_PASSWORD` e `MYSQL_PASSWORD`. Le scegli tu: servono solo sul tuo computer e non vanno mai committate.
+3. Avvia i servizi:
+   ```
+   docker compose up -d
+   ```
+4. Attendi che `db` e `redis` diventino `healthy`:
+   ```
+   docker compose ps
+   ```
+
+### 2. Nella cartella `backend/`: applicazione
+
 1. Installa le dipendenze PHP:
    ```
    composer install
    ```
-2. Crea il file di configurazione (in PowerShell e Git Bash):
+2. Crea il file di configurazione:
    ```
    cp .env.example .env
    ```
@@ -23,26 +41,38 @@ nella radice del repository.
    ```
    php artisan key:generate
    ```
-4. Crea il file `.env` nella **radice** del repository, copiando il `.env.example` della radice, e inserisci
-   le password: le scegli tu, sono solo per il tuo computer e non vanno mai committate.
-5. Avvia il database dalla radice del repository:
-   ```
-   docker compose up -d db
-   ```
-   Attendi che lo stato diventi `healthy` con `docker compose ps`.
-6. Nel file `backend/.env`, imposta `DB_PASSWORD` con lo stesso valore di `MYSQL_PASSWORD` nel `.env` della radice.
-7. Crea le tabelle:
+4. Apri `backend/.env` e imposta `DB_PASSWORD` con lo stesso valore di `MYSQL_PASSWORD` nel `.env` della radice.
+   Se hai cambiato `MYSQL_USER` o `MYSQL_DATABASE`, aggiorna anche `DB_USERNAME` e `DB_DATABASE` con gli stessi valori.
+5. Crea le tabelle:
    ```
    php artisan migrate
    ```
-
-Il `migrate` va eseguito una sola volta su un database vuoto.
+   Si può rieseguire: applica solo le migrazioni non ancora eseguite.
+6. Avvia il server:
+   ```
+   php artisan serve
+   ```
+   Poi apri [http://localhost:8000](http://localhost:8000): devi vedere la pagina di benvenuto.
 
 ## Comandi utili
 
-- `php artisan serve`: avvia il server di sviluppo su `http://localhost:8000`.
+Dalla radice:
+- `docker compose ps`: mostra lo stato dei servizi.
+- `docker compose down`: ferma i servizi. I dati restano.
+- `docker compose down -v`: ferma i servizi **e cancella anche i dati del database**. Usalo solo per ripartire da zero.
+
+Dalla cartella `backend/`:
 - `php artisan migrate:status`: mostra le migrazioni eseguite e verifica il collegamento al database.
-- `docker compose ps`, dalla radice: mostra lo stato dei servizi.
+- `php artisan serve`: avvia il server di sviluppo su `http://localhost:8000`.
+
+## Collegarsi al database con un client
+
+Con MySQL Workbench o un altro client usa:
+- host: `127.0.0.1`
+- porta: `3307`
+- utente: il valore di `MYSQL_USER`
+- password: il valore di `MYSQL_PASSWORD`
+- database: il valore di `MYSQL_DATABASE`
 
 ## Documentazione
 

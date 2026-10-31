@@ -57,7 +57,7 @@ in [`WORKFLOW.md`](docs/WORKFLOW.md), le scelte tecniche con le opzioni valutate
 
 ## Avvio in locale
 
-Le istruzioni complete arriveranno con il Livello 0. Per il backend e il database, vedi [`backend/README.md`](backend/README.md).
+Backend: vedi [`backend/README.md`](backend/README.md).
 
 ## Autore
 
