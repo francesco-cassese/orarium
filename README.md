@@ -24,8 +24,7 @@ La storia del progetto è nella cronologia dei commit, nelle issue e nelle pull 
 
 **Livello 0 — Fondamenta**, in corso.
 
-- Completato: struttura del repository, processo di lavoro, modelli di issue e pull request, decisioni tecniche, backend Laravel di base.
-- In corso: ambiente di sviluppo con MySQL e Redis in Docker.
+- Completato: struttura del repository, processo di lavoro, modelli di issue e pull request, decisioni tecniche, backend Laravel di base, ambiente di sviluppo con MySQL e Redis in Docker.
 - In arrivo: frontend React, test, CI e strumenti di misura.
 
 ## Stack previsto
