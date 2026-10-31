@@ -102,6 +102,29 @@ oppure avviare Laravel in locale diventa troppo complicato da mantenere.
 un livello di ottimizzazione: la misura va fatta prima con predis e poi con phpredis, con lo stesso carico e gli stessi
 dati, registrando i risultati nella documentazione delle prestazioni.
 
+## D-005 — Strumenti di qualità del backend (livello 0)
+
+**Contesto.** Il backend deve avere test automatici, formattazione uniforme e analisi statica fin dall'inizio, perché le funzionalità arriveranno su questa base. Il template Laravel porta PHPUnit e Pint, ma nessun analizzatore statico.
+
+**Opzioni valutate.**
+- Test con PHPUnit diretto: scartata, più verbosa da scrivere e leggere. Pest 5 esegue comunque i test PHPUnit esistenti.
+- Test con Pest 5: **scelta**.
+- Formattazione con Pint, preset `laravel`: **scelta**, con la regola `declare_strict_types` aggiunta.
+- Analisi statica con Larastan al livello 5: scartata. Il codice di partenza è minimo, quindi il livello massimo passa senza costo, e alzare il livello più tardi costa di più man mano che il codice cresce.
+- Analisi statica con Larastan al livello 10: **scelta**.
+
+**Decisione.**
+- Pest 5 (`pestphp/pest` e `pestphp/pest-plugin-laravel`, vincolo `^5.0`), con `"php": "^8.4"` in `composer.json`: Pest 5 richiede PHP 8.4, quindi il requisito del backend è PHP 8.4-8.5.
+- Pint con preset `laravel` e regola `declare_strict_types`, in `backend/pint.json`.
+- Larastan al livello 10 in `backend/phpstan.neon`. Regola del progetto: si corregge il codice, non si abbassa il livello.
+- Script Composer `test`, `format`, `format:check`, `analyse` e `check`, che esegue in sequenza formattazione, analisi e test.
+
+**Conseguenze.** La CI (issue #8) userà PHP 8.4. `declare_strict_types` aggiunge `declare(strict_types=1)` a ogni file PHP. Il livello 10 va mantenuto anche quando il codice cresce: un errore si corregge nel codice. Lo script `test` pulisce la cache della configurazione prima di eseguire Pest, così i test non girano per errore sul database di sviluppo. Larastan analizza oggi solo `app/` (`paths` in `phpstan.neon`): `routes/`, `config/` e `database/` non sono ancora coperti.
+
+**Punto aperto.** I test usano per ora la configurazione di `phpunit.xml` del template. Il database dei test (SQLite in memoria o MySQL dedicato) si decide al Livello 1, quando arrivano i primi modelli.
+
+**Rivalutare se.** Pest o Larastan cambiano linea di versione in modo incompatibile, oppure il progetto deve supportare PHP 8.3: in quel caso Pest tornerebbe alla linea 4.
+
 ## Registro
 
 | ID    | Data       | Decisione                               | Livello |
@@ -110,3 +133,4 @@ dati, registrando i risultati nella documentazione delle prestazioni.
 | D-002 | 2026-10-30 | Stile: Bootstrap 5 + SCSS               | 0       |
 | D-003 | 2026-10-30 | Gestore pacchetti: pnpm                 | 0       |
 | D-004 | 2026-10-31 | Ambiente di sviluppo: servizi in Docker | 0       |
+| D-005 | 2026-10-31 | Strumenti di qualità del backend        | 0       |
