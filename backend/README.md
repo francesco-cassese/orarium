@@ -1,58 +1,80 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Orarium — backend
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+API JSON in Laravel per Orarium. Il database MySQL e Redis girano in Docker, con il file `compose.yaml`
+nella radice del repository.
 
-## About Laravel
+## Requisiti
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- PHP 8.3-8.5 (testato con 8.4)
+- Composer
+- Docker Desktop
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Primo avvio
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### 1. Nella radice del repository: database e Redis
 
-## Learning Laravel
+1. Copia il file di esempio:
+   ```
+   cp .env.example .env
+   ```
+2. Apri `.env` e scegli le password per `MYSQL_ROOT_PASSWORD` e `MYSQL_PASSWORD`. Le scegli tu: servono solo sul tuo computer e non vanno mai committate.
+3. Avvia i servizi:
+   ```
+   docker compose up -d
+   ```
+4. Attendi che `db` e `redis` diventino `healthy`:
+   ```
+   docker compose ps
+   ```
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### 2. Nella cartella `backend/`: applicazione
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+1. Installa le dipendenze PHP:
+   ```
+   composer install
+   ```
+2. Crea il file di configurazione:
+   ```
+   cp .env.example .env
+   ```
+3. Genera la chiave dell'applicazione:
+   ```
+   php artisan key:generate
+   ```
+4. Apri `backend/.env` e imposta `DB_PASSWORD` con lo stesso valore di `MYSQL_PASSWORD` nel `.env` della radice.
+   Se hai cambiato `MYSQL_USER` o `MYSQL_DATABASE`, aggiorna anche `DB_USERNAME` e `DB_DATABASE` con gli stessi valori.
+5. Crea le tabelle:
+   ```
+   php artisan migrate
+   ```
+   Si può rieseguire: applica solo le migrazioni non ancora eseguite.
+6. Avvia il server:
+   ```
+   php artisan serve
+   ```
+   Poi apri [http://localhost:8000](http://localhost:8000): devi vedere la pagina di benvenuto.
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+## Comandi utili
 
-## Agentic Development
+Dalla radice:
+- `docker compose ps`: mostra lo stato dei servizi.
+- `docker compose down`: ferma i servizi. I dati restano.
+- `docker compose down -v`: ferma i servizi **e cancella anche i dati del database**. Usalo solo per ripartire da zero.
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+Dalla cartella `backend/`:
+- `php artisan migrate:status`: mostra le migrazioni eseguite e verifica il collegamento al database.
+- `php artisan serve`: avvia il server di sviluppo su `http://localhost:8000`.
 
-```bash
-composer require laravel/boost --dev
+## Collegarsi al database con un client
 
-php artisan boost:install
-```
+Con MySQL Workbench o un altro client usa:
+- host: `127.0.0.1`
+- porta: `3307`
+- utente: il valore di `MYSQL_USER`
+- password: il valore di `MYSQL_PASSWORD`
+- database: il valore di `MYSQL_DATABASE`
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+## Documentazione
 
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+- [Processo di lavoro](../docs/WORKFLOW.md): issue, branch, commit, pull request.
+- [Decisioni tecniche](../docs/DECISIONS.md): perché il progetto è fatto così.
