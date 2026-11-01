@@ -24,8 +24,8 @@ La storia del progetto è nella cronologia dei commit, nelle issue e nelle pull 
 
 **Livello 0 — Fondamenta**, in corso.
 
-- Completato: struttura del repository, processo di lavoro, modelli di issue e pull request, decisioni tecniche, backend Laravel di base, ambiente di sviluppo con MySQL e Redis in Docker, strumenti di qualità del backend (Pest, Pint, Larastan).
-- In arrivo: frontend React, CI e strumenti di misura.
+- Completato: struttura del repository, processo di lavoro, modelli di issue e pull request, decisioni tecniche, backend Laravel di base, ambiente di sviluppo con MySQL e Redis in Docker, strumenti di qualità del backend (Pest, Pint, Larastan), frontend React di base (Vite).
+- In arrivo: strumenti di qualità del frontend, CI e strumenti di misura.
 
 ## Stack previsto
 
@@ -57,6 +57,8 @@ in [`WORKFLOW.md`](docs/WORKFLOW.md), le scelte tecniche con le opzioni valutate
 ## Avvio in locale
 
 Backend: vedi [`backend/README.md`](backend/README.md).
+
+Frontend: vedi [`frontend/README.md`](frontend/README.md).
 
 ## Autore
 

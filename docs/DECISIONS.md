@@ -125,6 +125,21 @@ dati, registrando i risultati nella documentazione delle prestazioni.
 
 **Rivalutare se.** Pest o Larastan cambiano linea di versione in modo incompatibile, oppure il progetto deve supportare PHP 8.3: in quel caso Pest tornerebbe alla linea 4.
 
+## D-006 — Linguaggio del frontend (livello 0, frontend)
+
+**Contesto.** Il frontend è stato creato con la variante JavaScript del template React di Vite. L'obiettivo del progetto è approfondire React: rendering, prestazioni, gestione dello stato. Introdurre TypeScript nello stesso momento sposterebbe l'attenzione dal funzionamento di React al linguaggio.
+
+**Opzioni valutate.**
+- TypeScript fin da subito: scartata per ora, aggiunge configurazione e tipi prima che ci siano funzionalità da tipizzare.
+- JavaScript fino alla fine del Livello 1, poi migrazione a TypeScript: **scelta**.
+- JavaScript senza migrazione prevista: scartata, perderemmo i controlli sui tipi quando il progetto cresce.
+
+**Decisione.** Il frontend è in JavaScript. La migrazione a TypeScript avviene quando le funzionalità di base del Livello 1 sono complete, prima di iniziare il Livello 2, come lavoro dedicato con una sua issue.
+
+**Conseguenze.** Fino a quella data il compilatore non controlla i tipi. Per non perdere la documentazione dei dati, la forma delle risposte dell'API va descritta con commenti JSDoc vicino al codice che la usa: alla migrazione quei commenti diventano tipi. Le componenti nuove restano semplici, così la migrazione a TypeScript richiede meno lavoro.
+
+**Rivalutare se.** Il frontend cresce più in fretta del previsto, oppure emergono errori di tipo che TypeScript avrebbe evitato.
+
 ## Registro
 
 | ID    | Data       | Decisione                               | Livello |
@@ -134,3 +149,4 @@ dati, registrando i risultati nella documentazione delle prestazioni.
 | D-003 | 2026-10-30 | Gestore pacchetti: pnpm                 | 0       |
 | D-004 | 2026-10-31 | Ambiente di sviluppo: servizi in Docker | 0       |
 | D-005 | 2026-10-31 | Strumenti di qualità del backend        | 0       |
+| D-006 | 2026-11-01 | Linguaggio frontend: JavaScript ora     | 0       |
