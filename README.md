@@ -1,6 +1,7 @@
 # Orarium
 
 [![Frontend CI](https://github.com/francesco-cassese/orarium/actions/workflows/frontend.yml/badge.svg)](https://github.com/francesco-cassese/orarium/actions/workflows/frontend.yml)
+[![Backend CI](https://github.com/francesco-cassese/orarium/actions/workflows/backend.yml/badge.svg)](https://github.com/francesco-cassese/orarium/actions/workflows/backend.yml)
 
 Pianificazione di produzione e scorte per laboratori alimentari.
 

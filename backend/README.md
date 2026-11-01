@@ -1,5 +1,7 @@
 # Orarium — backend
 
+[![Backend CI](https://github.com/francesco-cassese/orarium/actions/workflows/backend.yml/badge.svg)](https://github.com/francesco-cassese/orarium/actions/workflows/backend.yml)
+
 API JSON in Laravel per Orarium. Il database MySQL e Redis girano in Docker, con il file `compose.yaml`
 nella radice del repository.
 
