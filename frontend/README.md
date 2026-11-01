@@ -28,13 +28,21 @@ Dalla cartella `frontend/`:
 - `pnpm build`: crea la versione di produzione nella cartella `dist/`.
 - `pnpm preview`: serve in locale la versione di produzione creata da `pnpm build`.
 - `pnpm lint`: controlla il codice con ESLint.
+- `pnpm format`: formatta i file con Prettier, modificandoli.
+- `pnpm format:check`: verifica la formattazione senza modificare i file.
+- `pnpm test`: esegue i test una volta sola con Vitest.
+- `pnpm test:watch`: esegue i test e li rilancia quando cambiano i file.
+- `pnpm check`: esegue in sequenza lint, controllo della formattazione e test. È il controllo da lanciare prima di aprire una pull request.
 
 ## Struttura
 
-- `src/`: codice dell'applicazione.
+- `src/`: codice dell'applicazione. I test stanno accanto al file che verificano, con suffisso `.test.jsx` (ad esempio `App.test.jsx` per `App.jsx`). Vitest li riconosce dal nome.
+- `src/test/setup.js`: configurazione dei test, eseguita prima di ogni file di test.
 - `public/`: file statici serviti così come sono.
 - `eslint.config.js`: configurazione di ESLint.
-- `vite.config.js`: configurazione di Vite.
+- `vite.config.js`: configurazione di Vite. Contiene anche la configurazione di Vitest, nella sezione `test`.
+- `.prettierrc`: regole di formattazione di Prettier.
+- `.prettierignore`: file che Prettier non formatta.
 
 ## Backend
 
