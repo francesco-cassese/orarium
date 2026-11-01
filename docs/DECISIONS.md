@@ -140,13 +140,36 @@ dati, registrando i risultati nella documentazione delle prestazioni.
 
 **Rivalutare se.** Il frontend cresce più in fretta del previsto, oppure emergono errori di tipo che TypeScript avrebbe evitato.
 
+## D-007 — Strumenti di qualità e test del frontend (livello 0, frontend)
+
+**Contesto.** Il frontend ha bisogno di formattazione uniforme, test automatici e fini di riga coerenti tra le macchine di sviluppo e la CI. Il template Vite non fornisce nessuno di questi strumenti.
+
+**Opzioni valutate.**
+- Vitest per i test: **scelta**. Jest scartata: con Jest si configurano due pipeline distinte, una per Vite e una per i test, con molte duplicazioni. Vitest usa la stessa configurazione di `vite.config.js` e la stessa pipeline di trasformazione ([documentazione](https://vitest.dev/guide/why)).
+- Testing Library con jsdom per i componenti: **scelta**.
+
+**Decisione.**
+- **Prettier** alla versione esatta `3.9.10`, senza `^`. La [guida di installazione](https://prettier.io/docs/install) consiglia una versione esatta, perché anche una patch di Prettier può cambiare la formattazione. È l'unica dipendenza con versione esatta: le altre usano `^`, perché il lockfile garantisce la riproducibilità.
+- **Regole di `frontend/.prettierrc`**, confrontate con i [valori di default](https://prettier.io/docs/options):
+  - `semi: false` (default `true`) e `singleQuote: true` (default `false`) cambiano il comportamento predefinito.
+  - `trailingComma: "all"`, `printWidth: 80` ed `endOfLine: "lf"` coincidono con il default.
+  - `endOfLine: "lf"` corrisponde ai fini di riga che `.gitattributes` impone nel repository.
+- **Vitest** con `vitest run` per il comando `test` (una sola esecuzione) e `vitest watch` per `test:watch`. Configurazione in `frontend/vite.config.js`: `environment: 'jsdom'` e `setupFiles` per `src/test/setup.js`.
+- **Testing Library**: i test cercano gli elementi per ruolo con `getByRole`, che la [documentazione](https://testing-library.com/docs/queries/byrole) indica come query preferita perché somiglia all'esperienza dell'utente. Si verifica ciò che l'utente vede, non i dettagli interni dei componenti. Il `cleanup` dopo ogni test sta in `frontend/src/test/setup.js`.
+- **Fini di riga LF**: `.gitattributes` alla radice con `* text=auto eol=lf` e `.editorconfig` con `end_of_line = lf`. La regola era in `backend/.gitattributes` ed è stata spostata alla radice, così vale per tutto il monorepo. Con `text=auto` Git normalizza i file testuali a LF nel repository ([manuale gitattributes](https://git-scm.com/docs/gitattributes)); con `eol=lf` il working tree li riceve con LF.
+
+**Conseguenze.** Aggiornare Prettier richiede una modifica esplicita della versione e una riformattazione deliberata. Sui file già esistenti con CRLF la normalizzazione si applica con `git add --renormalize .`, come indica il manuale di Git. `pnpm check` esegue lint, controllo di formattazione e test in sequenza.
+
+**Rivalutare se.** Aggiornare a mano la versione esatta di Prettier diventa un peso, oppure Vitest smette di condividere la configurazione di Vite e diventa conveniente tornare a Jest.
+
 ## Registro
 
 | ID    | Data       | Decisione                               | Livello |
 |-------|------------|-----------------------------------------|---------|
-| D-001 | 2026-10-30 | Monorepo                                | 0       |
-| D-002 | 2026-10-30 | Stile: Bootstrap 5 + SCSS               | 0       |
-| D-003 | 2026-10-30 | Gestore pacchetti: pnpm                 | 0       |
-| D-004 | 2026-10-31 | Ambiente di sviluppo: servizi in Docker | 0       |
-| D-005 | 2026-10-31 | Strumenti di qualità del backend        | 0       |
-| D-006 | 2026-11-01 | Linguaggio frontend: JavaScript ora     | 0       |
+| D-001 | 2026-10-30 | Monorepo                                 | 0       |
+| D-002 | 2026-10-30 | Stile: Bootstrap 5 + SCSS                | 0       |
+| D-003 | 2026-10-30 | Gestore pacchetti: pnpm                  | 0       |
+| D-004 | 2026-10-31 | Ambiente di sviluppo: servizi in Docker  | 0       |
+| D-005 | 2026-10-31 | Strumenti di qualità del backend         | 0       |
+| D-006 | 2026-11-01 | Linguaggio frontend: JavaScript ora      | 0       |
+| D-007 | 2026-11-01 | Strumenti di qualità e test del frontend | 0       |
