@@ -166,9 +166,20 @@ dati, registrando i risultati nella documentazione delle prestazioni.
 
 **Decisione.**
 - Azioni bloccate per commit SHA, con il tag come commento (`actions/checkout` v7.0.1, `pnpm/setup` v3.1.2).
-- Nessun filtro `paths`: il workflow parte su ogni PR. Una PR senza modifiche a `frontend/` non produrrebbe il controllo richiesto e bloccherebbe il merge. Costo: un run in più sulle PR di sola documentazione.
+- Nessun filtro `paths`: il workflow parte su ogni PR. Quando il controllo sarà obbligatorio nel ruleset, una PR senza modifiche a `frontend/` non produrrebbe il controllo richiesto e bloccherebbe il merge. Costo: un run in più sulle PR di sola documentazione.
 - Node 22, major LTS (`runtime: node@22`). Il log di `node --version` mostra la patch installata.
 - Job `check`: è il nome del controllo da richiedere nel ruleset.
+
+## D-009 — Workflow di CI del backend (livello 0, backend)
+
+**Decisione.**
+- Azioni bloccate per commit SHA, come in D-008.
+- Nessun filtro `paths`, per lo stesso motivo di D-008.
+- PHP 8.4, come richiede `composer.json` e Pest 5 (D-005). Coverage disattivato con `coverage: none`: la CI non genera report di copertura.
+- Test su SQLite in memoria, come da `phpunit.xml`, con `pdo_sqlite` dichiarato. La scelta del database dei test resta aperta fino al Livello 1 (D-005).
+- Cache di Composer con chiave sull'hash di `composer.lock`.
+- `composer validate --strict` come primo controllo: verifica che `composer.json` sia valido e che il lockfile sia allineato, l'equivalente di `--frozen-lockfile` nel frontend.
+- Job `check`, come in D-008. I due controlli si distinguono dal nome del workflow (`Frontend CI / check`, `Backend CI / check`).
 
 ## Registro
 
@@ -182,3 +193,4 @@ dati, registrando i risultati nella documentazione delle prestazioni.
 | D-006 | 2026-11-01 | Linguaggio frontend: JavaScript ora      | 0       |
 | D-007 | 2026-11-01 | Strumenti di qualità e test del frontend | 0       |
 | D-008 | 2026-11-01 | Workflow di CI del frontend              | 0       |
+| D-009 | 2026-11-01 | Workflow di CI del backend               | 0       |
