@@ -34,7 +34,7 @@ Strumenti scelti per il progetto. Non tutti sono ancora installati.
 - **Backend**: Laravel (API JSON)
 - **Frontend**: React con Vite, stile con Bootstrap e SCSS
 - **Database e cache**: MySQL e Redis in Docker
-- **Qualità**: Pest, Pint, Larastan, ESLint, Vitest
+- **Qualità**: Pest, Pint, Larastan, ESLint, Prettier, Vitest
 - **Misure**: k6
 - **Integrazione continua**: GitHub Actions
 
