@@ -168,7 +168,7 @@ dati, registrando i risultati nella documentazione delle prestazioni.
 - Azioni bloccate per commit SHA, con il tag come commento (`actions/checkout` v7.0.1, `pnpm/setup` v3.1.2).
 - Nessun filtro `paths`: il workflow parte su ogni PR. Quando il controllo sarà obbligatorio nel ruleset, una PR senza modifiche a `frontend/` non produrrebbe il controllo richiesto e bloccherebbe il merge. Costo: un run in più sulle PR di sola documentazione.
 - Node 22, major LTS (`runtime: node@22`). Il log di `node --version` mostra la patch installata.
-- Job `check`: è il nome del controllo da richiedere nel ruleset.
+- Job `frontend`: nome del controllo da richiedere nel ruleset quando sarà obbligatorio. Un nome distinto da quello del backend evita ambiguità in quel momento.
 
 ## D-009 — Workflow di CI del backend (livello 0, backend)
 
@@ -180,7 +180,7 @@ dati, registrando i risultati nella documentazione delle prestazioni.
 - APP_KEY di test in `phpunit.xml`: i test non la leggono dal `.env`. Il file `.env` deve comunque esistere in CI, perché senza di esso phpdotenv emette un avviso che Pest riporta come warning. Per questo lo step `cp .env.example .env` lo crea prima di `composer check`.
 - Cache di Composer con chiave sull'hash di `composer.lock`.
 - `composer validate --strict` come primo controllo: verifica che `composer.json` sia valido e che il lockfile sia allineato, l'equivalente di `--frozen-lockfile` nel frontend.
-- Job `check`, come in D-008. I due controlli si distinguono dal nome del workflow (`Frontend CI / check`, `Backend CI / check`).
+- Job `backend`, distinto da quello del frontend (D-008): nomi unici evitano ambiguità quando i controlli diventano obbligatori nel ruleset.
 
 ## Registro
 
