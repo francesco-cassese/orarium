@@ -177,6 +177,7 @@ dati, registrando i risultati nella documentazione delle prestazioni.
 - Nessun filtro `paths`, per lo stesso motivo di D-008.
 - PHP 8.4, come richiede `composer.json` e Pest 5 (D-005). Coverage disattivato con `coverage: none`: la CI non genera report di copertura.
 - Test su SQLite in memoria, come da `phpunit.xml`, con `pdo_sqlite` dichiarato. La scelta del database dei test resta aperta fino al Livello 1 (D-005).
+- APP_KEY di test definita in `phpunit.xml`, così i test non dipendono dal `.env`; nessun `.env` in CI.
 - Cache di Composer con chiave sull'hash di `composer.lock`.
 - `composer validate --strict` come primo controllo: verifica che `composer.json` sia valido e che il lockfile sia allineato, l'equivalente di `--frozen-lockfile` nel frontend.
 - Job `check`, come in D-008. I due controlli si distinguono dal nome del workflow (`Frontend CI / check`, `Backend CI / check`).
