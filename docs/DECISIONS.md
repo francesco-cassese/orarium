@@ -162,6 +162,14 @@ dati, registrando i risultati nella documentazione delle prestazioni.
 
 **Rivalutare se.** Aggiornare a mano la versione esatta di Prettier diventa un peso, oppure Vitest smette di condividere la configurazione di Vite e diventa conveniente tornare a Jest.
 
+## D-008 — Workflow di CI del frontend (livello 0, frontend)
+
+**Decisione.**
+- Azioni bloccate per commit SHA, con il tag come commento (`actions/checkout` v7.0.1, `pnpm/setup` v3.1.2).
+- Nessun filtro `paths`: il workflow parte su ogni PR. Una PR senza modifiche a `frontend/` non produrrebbe il controllo richiesto e bloccherebbe il merge. Costo: un run in più sulle PR di sola documentazione.
+- Node 22, major LTS (`runtime: node@22`). Il log di `node --version` mostra la patch installata.
+- Job `check`: è il nome del controllo da richiedere nel ruleset.
+
 ## Registro
 
 | ID    | Data       | Decisione                               | Livello |
@@ -173,3 +181,4 @@ dati, registrando i risultati nella documentazione delle prestazioni.
 | D-005 | 2026-10-31 | Strumenti di qualità del backend         | 0       |
 | D-006 | 2026-11-01 | Linguaggio frontend: JavaScript ora      | 0       |
 | D-007 | 2026-11-01 | Strumenti di qualità e test del frontend | 0       |
+| D-008 | 2026-11-01 | Workflow di CI del frontend              | 0       |

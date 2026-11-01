@@ -1,5 +1,7 @@
 # Orarium — frontend
 
+[![Frontend CI](https://github.com/francesco-cassese/orarium/actions/workflows/frontend.yml/badge.svg)](https://github.com/francesco-cassese/orarium/actions/workflows/frontend.yml)
+
 Interfaccia React dell'applicazione Orarium, creata con Vite.
 
 ## Requisiti
