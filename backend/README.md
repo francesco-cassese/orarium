@@ -54,6 +54,12 @@ nella radice del repository.
    ```
    Poi apri [http://localhost:8000](http://localhost:8000): devi vedere la pagina di benvenuto.
 
+## Endpoint disponibili
+
+- `GET /api/v1/health`: risponde `{"status":"ok"}` se l'applicazione è in funzione. Non usa il database né Redis.
+
+Per provarlo, con `php artisan serve` avviato, apri [http://localhost:8000/api/v1/health](http://localhost:8000/api/v1/health) nel browser.
+
 ## Comandi utili
 
 Dalla radice:
