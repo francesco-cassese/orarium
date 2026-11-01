@@ -1,6 +1,6 @@
 # Impostazioni del repository
 
-Configurazione del repository su GitHub. La strategia di merge è verificata il 2026-10-30 con GitHub CLI. La protezione del branch è configurata e verificata dalle impostazioni di GitHub il 2026-11-01.
+Configurazione del repository su GitHub. La strategia di merge è verificata il 2026-10-30 con GitHub CLI. La protezione del branch è configurata dalle impostazioni di GitHub e verificata sia dalle impostazioni sia con GitHub CLI il 2026-11-01.
 Se il repository viene ricreato, queste impostazioni vanno riapplicate.
 
 ## Protezione del branch `main`
