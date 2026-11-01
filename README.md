@@ -27,8 +27,8 @@ La storia del progetto è nella cronologia dei commit, nelle issue e nelle pull 
 
 **Livello 0 — Fondamenta**, in corso.
 
-- Completato: struttura del repository, processo di lavoro, modelli di issue e pull request, decisioni tecniche, backend Laravel di base, ambiente di sviluppo con MySQL e Redis in Docker, strumenti di qualità del backend (Pest, Pint, Larastan), frontend React di base (Vite), strumenti di qualità del frontend (ESLint, Prettier, Vitest).
-- In arrivo: CI e strumenti di misura.
+- Completato: struttura del repository, processo di lavoro, modelli di issue e pull request, decisioni tecniche, backend Laravel di base, ambiente di sviluppo con MySQL e Redis in Docker, strumenti di qualità del backend (Pest, Pint, Larastan), frontend React di base (Vite), strumenti di qualità del frontend (ESLint, Prettier, Vitest), CI di frontend e backend (GitHub Actions), con i controlli richiesti prima del merge.
+- In arrivo: strumenti di misura.
 
 ## Stack previsto
 
