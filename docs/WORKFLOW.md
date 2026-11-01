@@ -20,9 +20,11 @@ La documentazione in `docs/` è in italiano.
 
 Una regola: **`main` è sempre in uno stato funzionante e rilasciabile**.
 
+**Modifiche banali senza issue.** Sono banali le modifiche che non cambiano il comportamento dell'applicazione, non aggiungono dipendenze, non toccano le decisioni e restano sotto una ventina di righe. Per queste non serve una issue: il branch usa `<tipo>/<descrizione>` e, nel corpo della PR, al posto di `Closes #N` si scrive `No linked issue: <motivo in una riga>`. Le modifiche che non rientrano in questo criterio hanno una issue.
+
 ## 2. Nomi dei branch
 
-Formato: `<type>/<issue-number>-<short-description>`, in minuscolo con trattini.
+Formato: `<type>/<issue-number>-<short-description>`, in minuscolo con trattini. Per le modifiche banali senza issue: `<type>/<short-description>`, vedi sezione 1.
 
 ```
 feat/14-ingredient-list-endpoint
