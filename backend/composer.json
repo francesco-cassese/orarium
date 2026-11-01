@@ -35,14 +35,6 @@
         }
     },
     "scripts": {
-        "setup": [
-            "composer install",
-            "@php -r \"file_exists('.env') || copy('.env.example', '.env');\"",
-            "@php artisan key:generate",
-            "@php artisan migrate --force",
-            "npm install --ignore-scripts",
-            "npm run build"
-        ],
         "test": [
             "@php artisan config:clear --ansi @no_additional_args",
             "pest"
@@ -54,10 +46,6 @@
             "@format:check",
             "@analyse",
             "@test"
-        ],
-        "dev": [
-            "Composer\\Config::disableProcessTimeout",
-            "@php artisan dev"
         ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
