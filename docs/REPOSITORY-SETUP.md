@@ -1,19 +1,18 @@
 # Impostazioni del repository
 
-Configurazione del repository su GitHub, verificata il 2026-10-30 con GitHub CLI.
+Configurazione del repository su GitHub. La strategia di merge è verificata il 2026-10-30 con GitHub CLI. La protezione del branch è configurata e verificata dalle impostazioni di GitHub il 2026-11-01.
 Se il repository viene ricreato, queste impostazioni vanno riapplicate.
 
 ## Protezione del branch `main`
 
-**Stato: attiva in parte.** La protezione è un ruleset (`protect-main`), che è attivo sul branch predefinito e:
+**Stato: attiva dal 2026-11-01.** La protezione è un ruleset (`protect-main`), attivo sul branch predefinito, che:
 - richiede una pull request per ogni modifica a `main`;
-- blocca l'eliminazione del branch e i force-push.
+- blocca l'eliminazione del branch e i force-push;
+- richiede che passino i controlli `frontend` e `backend` (nomi dei job dei workflow GitHub Actions, vedi D-008 e D-009) prima del merge.
+
+Non richiede che il branch sia aggiornato rispetto a `main`: il progetto è gestito da una persona sola e le PR sono piccole, quindi il rischio di regressioni da integrazione è basso.
 
 Non richiede approvazioni, perché il progetto è gestito da una persona sola.
-
-**Da completare** quando esiste la pipeline di CI:
-- richiedere che i controlli della CI passino prima del merge;
-- richiedere che il branch sia aggiornato rispetto a `main` prima del merge.
 
 ## Strategia di merge
 
