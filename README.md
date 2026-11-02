@@ -30,6 +30,13 @@ La storia del progetto è nella cronologia dei commit, nelle issue e nelle pull 
 - Completato: struttura del repository, processo di lavoro, modelli di issue e pull request, decisioni tecniche, backend Laravel di base, ambiente di sviluppo con MySQL e Redis in Docker, strumenti di qualità del backend (Pest, Pint, Larastan), frontend React di base (Vite), strumenti di qualità del frontend (ESLint, Prettier, Vitest), CI di frontend e backend (GitHub Actions), con i controlli richiesti prima del merge, baseline di prestazioni del backend e del frontend registrate in [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md) e [`docs/FRONTEND-PERF.md`](docs/FRONTEND-PERF.md).
 - In corso: Livello 1 (milestone `L01 Ingredients`), che parte con una versione semplice e la sua misura di partenza.
 
+## Cosa guardare
+
+- [Documento del Livello 0](docs/levels/00-fondamenta.md): cosa ho fatto, cosa ho imparato e i limiti delle misure.
+- [Decisioni tecniche](docs/DECISIONS.md): perché ogni scelta, con le alternative scartate.
+- [Misure di partenza](docs/PERFORMANCE.md): metodo e risultati ripetibili.
+- [Pull request chiuse](https://github.com/francesco-cassese/orarium/pulls?q=is%3Apr+is%3Aclosed): il processo di lavoro, una modifica alla volta.
+
 ## Stack previsto
 
 Strumenti scelti per il progetto. Non tutti sono ancora installati.
@@ -68,4 +75,4 @@ Frontend: vedi [`frontend/README.md`](frontend/README.md).
 
 ## Autore
 
-Francesco Cassese — sviluppatore full stack (PHP, Laravel, React).
+Francesco Cassese — sviluppatore full stack (PHP, Laravel, React). [LinkedIn](https://www.linkedin.com/in/francesco-cassese/)
