@@ -14,7 +14,7 @@ Non richiede che il branch sia aggiornato rispetto a `main`: il progetto è gest
 
 Non richiede approvazioni, perché il progetto è gestito da una persona sola.
 
-Il 2026-11-02 la PR #48, con un test che deve fallire, ha fatto risultare rosso il controllo `backend` (`frontend` è passato), ed è stata chiusa senza merge.
+Il 2026-11-02 ho verificato che il blocco funziona: nella PR #48, un test fallito di proposito ha reso rosso il controllo `backend` (`frontend` è passato) e il pulsante «Squash and merge» era disabilitato. La PR è stata chiusa senza merge.
 
 ## Strategia di merge
 
