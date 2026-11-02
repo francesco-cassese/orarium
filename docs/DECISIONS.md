@@ -15,8 +15,7 @@ decisioni, benchmark) andrebbe duplicata.
 
 **Decisione.** Monorepo. Ogni funzionalità è una sola PR revisionabile e il contratto API resta allineato al frontend.
 
-**Conseguenze.** La CI ha due job, ciascuno attivato solo dai percorsi della propria cartella (`paths:`). Non serve
-ancora nessuno strumento di gestione del monorepo (Nx, Turborepo).
+**Conseguenze.** La CI ha due job distinti, uno per cartella (D-008, D-009). Non serve ancora nessuno strumento di gestione del monorepo (Nx, Turborepo).
 
 **Rivalutare se.** Frontend e backend hanno cicli di rilascio o team indipendenti.
 
