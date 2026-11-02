@@ -204,6 +204,26 @@ passa su SQLite può fallire su MySQL. La scelta del database dei test era riman
 **Rivalutare se.** Il tempo di esecuzione in CI su MySQL rallenta in modo sensibile il ciclo di PR, oppure emergono
 test che richiedono proprio SQLite.
 
+## D-011 — Denaro in centesimi interi (livello 1)
+
+**Contesto.** Il progetto salva prezzi: ingredienti ora, ricette e ordini dopo. Un errore di arrotondamento nei soldi si somma a ogni calcolo.
+
+**Opzioni valutate.**
+- Numero in virgola mobile (`float`, `double`): scartata, non è esatto (`0,1 + 0,2` non dà `0,3`).
+- Colonna `DECIMAL(10,2)`: l'alternativa seria, esatta e leggibile in SQL. Scartata: il valore arriva a PHP come stringa e va convertito a ogni lettura, mentre un intero si usa così com'è.
+- Intero in centesimi (`price_cents`): **scelta**. È esatto e viaggia uguale nel database, in PHP e nel JSON. Svantaggio: va convertito ai bordi (vedi Conseguenze).
+- Una libreria per il denaro: scartata per ora, perché non serve con una sola valuta.
+
+**Decisione.** Il prezzo è un intero non negativo in centesimi, nella colonna `price_cents`, di tipo intero senza segno a 32 bit (fino a circa 42,9 milioni di euro). Il valore è il prezzo di una unità (`unit`) dell'ingrediente: per la farina venduta a chili, `120` vale 1,20 € al chilo. Una sola valuta: l'euro.
+
+**Conseguenze.**
+- Conversione solo ai bordi: all'ingresso (euro inseriti → centesimi) e nella visualizzazione (centesimi → euro). Nel database il valore non è leggibile a occhio, e ogni punto di ingresso e di uscita deve convertire: dimenticare la conversione dà un prezzo cento volte sbagliato.
+- Validazione come intero non negativo, nelle Form Request (#40).
+- Formato di visualizzazione nel frontend: virgola come separatore decimale e due cifre dopo la virgola.
+- **Limite**: un prezzo inferiore al centesimo non si può rappresentare. La farina a 120 centesimi al chilo costa circa 0,12 centesimi al grammo, quindi non si può salvare un prezzo al grammo. Il prezzo resta per unità di `unit`; il costo di una ricetta, che calcola la quantità usata, dovrà definire la regola di arrotondamento. Quella regola si scrive quando arriverà la tabella delle ricette, non qui.
+
+**Rivalutare se.** Servono più valute, oppure serve usare direttamente prezzi inferiori al centesimo per unità. In quel caso si valuta una precisione più fine, per esempio millesimi di centesimo in una colonna `price_milli_cents`: più scomoda, ma senza perdita.
+
 ## Registro
 
 | ID    | Data       | Decisione                               | Livello |
@@ -218,3 +238,4 @@ test che richiedono proprio SQLite.
 | D-008 | 2026-11-01 | Workflow di CI del frontend              | 0       |
 | D-009 | 2026-11-01 | Workflow di CI del backend               | 0       |
 | D-010 | 2026-11-02 | Database dei test: MySQL                 | 1       |
+| D-011 | 2026-11-02 | Denaro in centesimi interi               | 1       |
