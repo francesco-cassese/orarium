@@ -123,3 +123,11 @@ Una issue è finita quando:
 **Inizio** (5 minuti): aggiorno `main`, scelgo la issue, creo il branch, rileggo i criteri di accettazione.
 
 **Fine** (10 minuti): commit e push, PR aperta o aggiornata, scrivo il prossimo passo nella issue.
+
+## 9. Uso dell'AI
+
+Uso un assistente AI per studiare le parti che non ho ancora affrontato, per rivedere codice e testi e, a volte, per avere una prima bozza di issue e documenti, che poi modifico io.
+
+- Le scelte sono mie e le registro in `DECISIONS.md` con le alternative valutate.
+- Quello che non conosco lo confronto con la documentazione ufficiale e con ricerche online prima di tenerlo.
+- Rileggo ogni modifica prima del merge, con la checklist della pull request.
