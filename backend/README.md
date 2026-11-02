@@ -28,6 +28,7 @@ nella radice del repository.
    ```
    docker compose ps
    ```
+   Lo script `docker/mysql/init/01-test-database.sh` crea il database `orarium_test`, usato dai test, solo quando il volume `mysql_data` è nuovo. Se avevi già il volume, vedi la sezione sotto.
 
 ### 2. Nella cartella `backend/`: applicazione
 
@@ -56,6 +57,26 @@ nella radice del repository.
    ```
    Poi apri [http://localhost:8000](http://localhost:8000): devi vedere la pagina di benvenuto.
 
+### Se hai già un volume MySQL
+
+Lo script del database di test non viene eseguito su un volume già esistente. Hai due strade:
+
+- Ricreare il volume, da zero:
+  ```
+  docker compose down -v
+  docker compose up -d
+  ```
+  **Cancella i dati di sviluppo.** Poi rilancia `php artisan migrate` dalla cartella `backend/` per ricreare le tabelle.
+- Creare il database a mano, senza cancellare nulla. Dalla radice apri il client MySQL con la password di root, cioè il valore di `MYSQL_ROOT_PASSWORD`:
+  ```
+  docker compose exec db mysql -uroot -p
+  ```
+  Nel client `mysql>` incolla le due righe, sostituendo `orarium` con il valore di `MYSQL_USER`:
+  ```
+  CREATE DATABASE IF NOT EXISTS orarium_test;
+  GRANT ALL PRIVILEGES ON `orarium\_test`.* TO 'orarium'@'%';
+  ```
+
 ## Endpoint disponibili
 
 - `GET /api/v1/health`: risponde `{"status":"ok"}` se l'applicazione è in funzione. Non usa il database né Redis.
@@ -73,7 +94,7 @@ Dalla cartella `backend/`:
 - `php artisan migrate:status`: mostra le migrazioni eseguite e verifica il collegamento al database.
 - `php artisan serve`: avvia il server di sviluppo su `http://localhost:8000`.
 - `composer check`: esegue in sequenza formattazione, analisi statica e test. È il controllo da lanciare prima di aprire una pull request: la CI lo rifarà.
-- `composer test`: esegue i test con Pest, dopo aver pulito la cache della configurazione.
+- `composer test`: esegue i test con Pest, dopo aver pulito la cache della configurazione. I test usano il database `orarium_test` su MySQL, quindi richiedono il servizio `db` acceso (`docker compose ps`).
 - `composer format`: formatta il codice con Pint.
 - `composer format:check`: verifica la formattazione senza modificare i file. Se fallisce, lancia `composer format` e riprova.
 - `composer analyse`: esegue l'analisi statica con Larastan.

@@ -121,7 +121,7 @@ dati, registrando i risultati nella documentazione delle prestazioni.
 
 **Conseguenze.** La CI (issue #8) userà PHP 8.4. `declare_strict_types` aggiunge `declare(strict_types=1)` a ogni file PHP. Il livello 10 va mantenuto anche quando il codice cresce: un errore si corregge nel codice. Lo script `test` pulisce la cache della configurazione prima di eseguire Pest, così i test non girano per errore sul database di sviluppo. Larastan analizza oggi solo `app/` (`paths` in `phpstan.neon`): `routes/`, `config/` e `database/` non sono ancora coperti.
 
-**Punto aperto.** I test usano per ora la configurazione di `phpunit.xml` del template. Il database dei test (SQLite in memoria o MySQL dedicato) si decide al Livello 1, quando arrivano i primi modelli.
+**Punto aperto (chiuso da D-010).** Il database dei test era da decidere al Livello 1. D-010 sceglie MySQL dedicato.
 
 **Rivalutare se.** Pest o Larastan cambiano linea di versione in modo incompatibile, oppure il progetto deve supportare PHP 8.3: in quel caso Pest tornerebbe alla linea 4.
 
@@ -176,11 +176,34 @@ dati, registrando i risultati nella documentazione delle prestazioni.
 - Azioni bloccate per commit SHA, come in D-008.
 - Nessun filtro `paths`, per lo stesso motivo di D-008.
 - PHP 8.4, come richiede `composer.json` e Pest 5 (D-005). Coverage disattivato con `coverage: none`: la CI non genera report di copertura.
-- Test su SQLite in memoria, come da `phpunit.xml`, con `pdo_sqlite` dichiarato. La scelta del database dei test resta aperta fino al Livello 1 (D-005).
+- Test su SQLite in memoria (superata da D-010: i test usano MySQL e l'estensione `pdo_mysql`).
 - APP_KEY di test in `phpunit.xml`: i test non la leggono dal `.env`. Il file `.env` deve comunque esistere in CI, perché senza di esso phpdotenv emette un avviso che Pest riporta come warning. Per questo lo step `cp .env.example .env` lo crea prima di `composer check`.
 - Cache di Composer con chiave sull'hash di `composer.lock`.
 - `composer validate --strict` come primo controllo: verifica che `composer.json` sia valido e che il lockfile sia allineato, l'equivalente di `--frozen-lockfile` nel frontend.
 - Job `backend`, distinto da quello del frontend (D-008): nomi unici evitano ambiguità quando i controlli diventano obbligatori nel ruleset.
+
+## D-010 — Database dei test: MySQL (livello 1)
+
+**Contesto.** Il template Laravel esegue i test su SQLite in memoria (D-009). Il progetto usa MySQL 8.4 in sviluppo
+(D-004), ed è il motore previsto anche in produzione. Tipi di dati, collation, vincoli e funzioni SQL non coincidono tra i due motori: un test che
+passa su SQLite può fallire su MySQL. La scelta del database dei test era rimandata al Livello 1 (D-005).
+
+**Opzioni valutate.**
+- SQLite in memoria, come in `phpunit.xml` del template: scartata, il motore è diverso da quello usato davvero.
+- MySQL 8.4 dedicato ai test (database separato, stesso motore dello sviluppo): **scelta**.
+- SQLite nei test locali e MySQL solo in CI: scartata. Tornerebbero due motori, e un test verde in locale potrebbe diventare rosso in CI.
+- Stesso database di sviluppo: scartata, i test ricreano le tabelle e cancellerebbero i dati locali.
+
+**Decisione.** I test usano MySQL 8.4 con un database separato da quello di sviluppo (ad esempio `orarium_test`): in locale sullo stesso servizio Docker, in CI su un servizio MySQL equivalente.
+
+**Conseguenze.**
+- `phpunit.xml` punta a MySQL, e D-009 è aggiornata di conseguenza.
+- La CI avvia un servizio MySQL 8.4 con healthcheck.
+- Il container deve creare `orarium_test` e concedere i permessi all'utente applicativo: in `compose.yaml`, `MYSQL_USER` ha permessi solo su `MYSQL_DATABASE`, quindi senza questo passo i test falliscono con "Access denied".
+- I test sono più lenti di SQLite in memoria. Va misurato con i primi test di integrazione.
+
+**Rivalutare se.** Il tempo di esecuzione in CI su MySQL rallenta in modo sensibile il ciclo di PR, oppure emergono
+test che richiedono proprio SQLite.
 
 ## Registro
 
@@ -195,3 +218,4 @@ dati, registrando i risultati nella documentazione delle prestazioni.
 | D-007 | 2026-11-01 | Strumenti di qualità e test del frontend | 0       |
 | D-008 | 2026-11-01 | Workflow di CI del frontend              | 0       |
 | D-009 | 2026-11-01 | Workflow di CI del backend               | 0       |
+| D-010 | 2026-11-02 | Database dei test: MySQL                 | 1       |
