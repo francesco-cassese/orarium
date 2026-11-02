@@ -25,7 +25,7 @@ La storia del progetto è nella cronologia dei commit, nelle issue e nelle pull 
 
 ## Stato attuale
 
-**Livello 0 — Fondamenta**, in corso.
+**Livello 0 — Fondamenta**, in corso. Il documento del livello è in [`docs/levels/00-fondamenta.md`](docs/levels/00-fondamenta.md).
 
 - Completato: struttura del repository, processo di lavoro, modelli di issue e pull request, decisioni tecniche, backend Laravel di base, ambiente di sviluppo con MySQL e Redis in Docker, strumenti di qualità del backend (Pest, Pint, Larastan), frontend React di base (Vite), strumenti di qualità del frontend (ESLint, Prettier, Vitest), CI di frontend e backend (GitHub Actions), con i controlli richiesti prima del merge, baseline di prestazioni del backend e del frontend registrate in [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md) e [`docs/FRONTEND-PERF.md`](docs/FRONTEND-PERF.md).
 - In arrivo: chiusura del Livello 0 (issue #11) e inizio del Livello 1.
