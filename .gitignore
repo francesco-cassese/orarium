@@ -33,3 +33,7 @@
 *.log
 .DS_Store
 Thumbs.db
+
+# Corse di controllo senza pausa: non valide (il server chiude ogni connessione
+# e Windows esaurisce le porte), conservate solo per documentazione.
+/benchmarks/results/invalid-ctrl-no-pause/
