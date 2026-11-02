@@ -14,6 +14,8 @@ Non richiede che il branch sia aggiornato rispetto a `main`: il progetto è gest
 
 Non richiede approvazioni, perché il progetto è gestito da una persona sola.
 
+Il 2026-11-02 la PR #48, con un test che deve fallire, ha fatto risultare rosso il controllo `backend` (`frontend` è passato), ed è stata chiusa senza merge.
+
 ## Strategia di merge
 
 **Stato: attiva.**

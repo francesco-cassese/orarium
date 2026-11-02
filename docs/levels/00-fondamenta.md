@@ -2,7 +2,7 @@
 
 ## Obiettivo
 
-Con questo livello voglio avere un repository ordinato dal primo giorno: un processo di lavoro chiaro, un ambiente di sviluppo che si riproduce su un'altra macchina, controlli automatici su backend e frontend, e una prima misura di partenza. Viene prima di qualsiasi funzione perché ogni miglioramento dei livelli successivi va confrontato con questa misura, e senza i controlli non c'è modo di accorgersi se una modifica peggiora le cose.
+Con questo livello voglio avere un repository ordinato dal primo giorno: un processo di lavoro chiaro, un ambiente di sviluppo che si ricostruisce da una cartella pulita seguendo i README, controlli automatici su backend e frontend, e una prima misura di partenza. Viene prima di qualsiasi funzione perché ogni miglioramento dei livelli successivi va confrontato con questa misura, e senza i controlli non c'è modo di accorgersi se una modifica peggiora le cose.
 
 ## Cosa ho fatto
 
@@ -24,7 +24,7 @@ Tutte le decisioni sono in [DECISIONS.md](../DECISIONS.md). Le tre che contano d
 
 - D-001: un monorepo, con backend, frontend, benchmarks e documentazione nello stesso repository.
 - D-004: MySQL e Redis in Docker, con versioni fissate e porte legate a `127.0.0.1`.
-- D-009: la CI del backend, con i test su SQLite in memoria e una chiave di test in `phpunit.xml`.
+- D-009: la CI del backend, con i test su SQLite in memoria e una chiave di test in `phpunit.xml` (poi superata da D-010: i test usano MySQL).
 
 ## Misure
 
@@ -48,12 +48,15 @@ Ho imparato più dagli errori che dalle cose andate bene. Questi sono gli episod
 
 **Un numero senza metodo non serve a nessuno.** Nei documenti e nelle PR ho scritto più volte affermazioni che non avevo verificato: un hash, una data, il numero di richieste. Ogni valore ora ha dietro il comando o il file da cui viene, e lo controllo prima di scriverlo.
 
+**Una spunta è un'affermazione da provare.** Nella issue #8 avevo spuntato il criterio «un test che fallisce blocca il merge» senza averlo provato. L'ho verificato dopo, con la PR #48, chiusa senza merge: il controllo `backend` è diventato rosso e il pulsante di merge era disabilitato. Lo stesso era successo con il setup dell'ambiente (#3). Il 2026-11-02 l'ho rifatto da una cartella pulita, con un volume MySQL nuovo, seguendo solo i README di backend e frontend: `health`, `composer check`, `pnpm check` e la pagina nel browser hanno funzionato senza correzioni. Ora spunto un criterio solo dopo aver visto la prova.
+
 ## Limiti e cose rimaste aperte
 
 - Le misure sono fatte su un solo computer e in una sola sessione. Non rappresentano un ambiente di produzione.
 - Alla chiusura del livello il database dei test era ancora da decidere (SQLite in memoria oppure MySQL dedicato). Deciso poi al Livello 1: MySQL dedicato (D-010).
 - Prima di un deploy vanno verificati due punti del backend. Il CORS è da verificare: nel repository non c'è un `config/cors.php`, quindi vale il default del framework. L'header `X-Powered-By` è da verificare con `curl -I`: se mostra la versione di PHP, va disattivato con `expose_php = Off`. In `backend/.env.example` `APP_DEBUG` è `true`.
 - Le azioni della CI sono fissate a SHA, ma nel repository non c'è un `.github/dependabot.yml` che le aggiorni. Anche `composer audit` e `pnpm audit` non sono nei workflow.
+- L'ambiente di sviluppo è stato ricostruito da una cartella pulita solo sul mio computer, con Windows. Non l'ho provato su un'altra macchina o su un altro sistema operativo.
 
 ## Prossimo livello
 
