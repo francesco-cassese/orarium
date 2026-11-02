@@ -51,10 +51,10 @@ Ho imparato più dagli errori che dalle cose andate bene. Questi sono gli episod
 ## Limiti e cose rimaste aperte
 
 - Le misure sono fatte su un solo computer e in una sola sessione. Non rappresentano un ambiente di produzione.
-- Il database dei test non è ancora deciso: SQLite in memoria oppure MySQL dedicato. Lo decido al Livello 1, quando arrivano i primi modelli (D-005).
+- Alla chiusura del livello il database dei test era ancora da decidere (SQLite in memoria oppure MySQL dedicato). Deciso poi al Livello 1: MySQL dedicato (D-010).
 - Prima di un deploy vanno verificati due punti del backend. Il CORS è da verificare: nel repository non c'è un `config/cors.php`, quindi vale il default del framework. L'header `X-Powered-By` è da verificare con `curl -I`: se mostra la versione di PHP, va disattivato con `expose_php = Off`. In `backend/.env.example` `APP_DEBUG` è `true`.
 - Le azioni della CI sono fissate a SHA, ma nel repository non c'è un `.github/dependabot.yml` che le aggiorni. Anche `composer audit` e `pnpm audit` non sono nei workflow.
 
 ## Prossimo livello
 
-Il Livello 1 è la milestone `L01 Ingredients`, ancora senza issue. Il database dei test lo decido con i primi modelli (D-005).
+Il Livello 1 è la milestone `L01 Ingredients`: parte con una versione semplice e la sua misura di partenza.

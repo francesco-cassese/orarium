@@ -121,4 +121,5 @@ Una issue è finita quando:
 ## 8. Routine di ogni sessione
 
 **Inizio** (5 minuti): aggiorno `main`, scelgo la issue, creo il branch, rileggo i criteri di accettazione.
-**Fine** (10 minuti): commit e push, PR aperta o aggiornata, una nota nel diario di apprendimento, scrivo il prossimo passo nella issue.
+
+**Fine** (10 minuti): commit e push, PR aperta o aggiornata, scrivo il prossimo passo nella issue.
