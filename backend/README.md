@@ -7,7 +7,7 @@ nella radice del repository.
 
 ## Requisiti
 
-- PHP 8.4-8.5 (testato con 8.4)
+- PHP `^8.4`, come indica `composer.json`. La CI usa PHP 8.4.
 - Composer
 - Docker Desktop
 
@@ -55,7 +55,7 @@ nella radice del repository.
    ```
    php artisan serve
    ```
-   Poi apri [http://localhost:8000](http://localhost:8000): devi vedere la pagina di benvenuto.
+   Poi verifica che risponda, come descritto in [Endpoint disponibili](#endpoint-disponibili). La radice `http://localhost:8000` non ha una pagina: il progetto è solo API.
 
 ### Se hai già un volume MySQL
 
@@ -71,7 +71,7 @@ Lo script del database di test non viene eseguito su un volume già esistente. H
   ```
   docker compose exec db mysql -uroot -p
   ```
-  Nel client `mysql>` incolla le due righe, sostituendo `orarium` con il valore di `MYSQL_USER`:
+  Nel client `mysql>` incolla le due righe, sostituendo solo `'orarium'@'%'` con l'utente scelto in `MYSQL_USER` (lascia `orarium_test` com'è):
   ```
   CREATE DATABASE IF NOT EXISTS orarium_test;
   GRANT ALL PRIVILEGES ON `orarium\_test`.* TO 'orarium'@'%';
