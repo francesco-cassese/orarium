@@ -56,7 +56,8 @@ docs/         regole di lavoro, decisioni, misure e documenti di livello
 
 Il flusso segue le pratiche di un team: issue, branch, Conventional Commits, pull request
 con controlli automatici e squash merge. La documentazione è in [`docs/`](docs/README.md): il processo
-in [`WORKFLOW.md`](docs/WORKFLOW.md), le scelte tecniche con le opzioni valutate in
+in [`WORKFLOW.md`](docs/WORKFLOW.md), le regole di nome e di dati in
+[`CONVENTIONS.md`](docs/CONVENTIONS.md), le scelte tecniche con le opzioni valutate in
 [`DECISIONS.md`](docs/DECISIONS.md).
 
 ## Avvio in locale

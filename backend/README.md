@@ -111,4 +111,5 @@ Con MySQL Workbench o un altro client usa:
 ## Documentazione
 
 - [Processo di lavoro](../docs/WORKFLOW.md): issue, branch, commit, pull request.
+- [Convenzioni di nome e di dati](../docs/CONVENTIONS.md): database, API, codice.
 - [Decisioni tecniche](../docs/DECISIONS.md): perché il progetto è fatto così.

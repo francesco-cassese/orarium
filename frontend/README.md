@@ -6,7 +6,7 @@ Interfaccia React dell'applicazione Orarium, creata con Vite.
 
 ## Requisiti
 
-- Node.js `^20.19.0` oppure `>=22.12.0`, il requisito di Vite. Controlla la versione con `node -v`.
+- Node.js `^20.19.0` oppure `>=22.12.0`, come indica il campo `engines` di `package.json`. La CI usa Node 22 (D-008). Controlla la versione con `node -v`.
 - pnpm, nella versione indicata nel campo `packageManager` di `package.json` (`pnpm@11.7.0`). Verifica la versione installata con `pnpm -v`.
   Per installarlo segui la [documentazione ufficiale di pnpm](https://pnpm.io/installation).
 
@@ -53,4 +53,5 @@ Per ora il frontend non chiama il backend. Per avviare l'API e il database, segu
 ## Documentazione
 
 - [Processo di lavoro](../docs/WORKFLOW.md): issue, branch, commit, pull request.
+- [Convenzioni di nome e di dati](../docs/CONVENTIONS.md): database, API, codice.
 - [Decisioni tecniche](../docs/DECISIONS.md): perché il progetto è fatto così.
