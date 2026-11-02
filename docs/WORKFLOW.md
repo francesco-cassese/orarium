@@ -9,7 +9,7 @@ La documentazione in `docs/` è in italiano.
 
 ## 1. Ciclo di una modifica
 
-1. **Issue**: scelgo dal backlog una issue del milestone corrente e la sposto in "In progress".
+1. **Issue**: scelgo una issue del milestone corrente e me l'assegno.
 2. **Branch** da `main` aggiornato.
 3. **Commit piccoli** (Conventional Commits), uno per cambiamento logico.
 4. **Pull request** appena c'è qualcosa da vedere (anche come bozza). Il titolo segue le stesse regole dei commit.
