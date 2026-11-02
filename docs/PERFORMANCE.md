@@ -49,6 +49,8 @@ k6 run -e ENDPOINT=/api/v1/health --summary-export=results/health-runN.json smok
 
 Per i controlli, con il server di controllo avviato, aggiungi `-e PAUSE=0.1`.
 
+Lancia da PowerShell, oppure da Git Bash con `MSYS_NO_PATHCONV=1`. Senza questa variabile Git Bash trasforma `/up` in un percorso Windows: l'URL non è valido, la richiesta non parte e la corsa, con la sola soglia sull'errore, esce con 0. La soglia `http_reqs: ['count>0']` fa uscire la corsa con 99 in quel caso.
+
 ### Calcoli
 
 - Mediana e p95 di ogni corsa: campi `med` e `p(95)` di `http_req_duration`.
@@ -73,7 +75,7 @@ Lettura preliminare: in questo ambiente lo script PHP minimo costa circa 2 ms e 
 - **Metodo non uniforme.** Le corse di Laravel non hanno pausa; i controlli sì (0.1 secondi). Il ritmo è simile (circa 10 richieste al secondo), ma il comportamento no.
 - **Numero di corse.** Per Laravel sono state misurate quattro corse, non cinque come per i controlli. Non corretto in questa baseline.
 - **Momento delle misure.** Le rotte di Laravel sono state misurate alle 00:52–00:53 e i controlli alle 01:07–01:09, circa quindici minuti dopo e non alternati. A questa scala la conclusione non cambia, ma sono condizioni diverse.
-- **Valore anomalo.** `up-run3` ha un p95 di 132.3 ms, molto sopra le altre corse. Non è spiegato.
+- **Valore anomalo.** `up-run3` ha un p95 di 132.3 ms, molto sopra le altre corse misurate, e 92 richieste contro 95 delle altre. La corsa più lenta completa meno richieste, ma la causa del valore non è spiegata.
 - **Differenza tra rotte.** `/up` è circa 2.5 ms più lenta di `/api/v1/health`. Cause possibili, tutte non verificate:
   - `/up` renderizza una vista Blade (`health-up.blade.php`), mentre `/api/v1/health` restituisce JSON;
   - `/up` lancia l'evento `DiagnosingHealth`, `/api/v1/health` no;
