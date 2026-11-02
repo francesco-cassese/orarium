@@ -92,7 +92,7 @@ l'etichetta descrive l'ambito della issue.
 ### Milestone
 
 Uno per livello: `L00 Foundations`, `L01 Ingredients`, `L02 Authentication`, ...
-Il livello è finito quando il milestone è chiuso, il documento di livello compilato e i tag creati.
+Il livello è finito quando il milestone è chiuso, il documento di livello compilato e i tag creati. Il documento di livello è in `docs/levels/NN-nome.md` (per il Livello 0: `docs/levels/00-fondamenta.md`) e racconta cosa si è fatto e cosa si è imparato. I numeri delle misure non vanno ricopiati lì: stanno nella documentazione delle prestazioni, `docs/PERFORMANCE.md` per il backend e `docs/FRONTEND-PERF.md` per il frontend, e il documento di livello ne riporta solo il riferimento.
 
 ## 5. Pull request
 
@@ -113,8 +113,9 @@ Una issue è finita quando:
 
 ## 7. Versioni e tag
 
-- **Livelli**: `level-NN-naive` e `level-NN-optimized`.
-- **Rilasci**: versionamento semantico (`v0.1.0`, `v0.2.0`, ...), un rilascio per livello completato, con note generate dai Conventional Commits.
+- **Livelli**: `level-NN-naive` e `level-NN-optimized`, a partire dal Livello 1.
+- **Eccezione, Livello 0**: non ha una versione da ottimizzare, quindi usa un solo tag, `level-00`, e il rilascio `v0.0.1`. Le coppie naive/optimized valgono dal Livello 1 in poi.
+- **Rilasci**: versionamento semantico, un rilascio per livello completato, con note generate dai Conventional Commits. Il numero segue il livello: il Livello 0 è `v0.0.1`, e dal Livello N in poi il rilascio è `v0.N.0` (Livello 1 → `v0.1.0`, Livello 2 → `v0.2.0`, ...).
 - I tag sono annotati: `git tag -a v0.1.0 -m "Level 01: ingredients"`.
 
 ## 8. Routine di ogni sessione
