@@ -2,7 +2,7 @@
 
 | Documento | Contenuto |
 |---|---|
-| [WORKFLOW.md](WORKFLOW.md) | Come si lavora: issue, branch, Conventional Commits, pull request, Definition of Done, versioni |
+| [WORKFLOW.md](WORKFLOW.md) | Come si lavora: issue, branch, Conventional Commits, pull request, Definition of Done, versioni, uso dell'AI |
 | [CONVENTIONS.md](CONVENTIONS.md) | Regole di nome e di dati: database, API, codice backend e frontend |
 | [DECISIONS.md](DECISIONS.md) | Registro delle decisioni tecniche, con opzioni valutate e condizioni di revisione |
 | [REPOSITORY-SETUP.md](REPOSITORY-SETUP.md) | Impostazioni da applicare una sola volta su GitHub |
