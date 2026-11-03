@@ -35,4 +35,5 @@ Il 2026-11-02 ho verificato che il blocco funziona: nella PR #48, un test fallit
 **Stato: attiva dal 2026-11-03.**
 - Descrizione: «Pianificazione di produzione e scorte per laboratori alimentari, costruita un livello alla volta con Laravel e React, con CI, controlli di qualità e misure di prestazioni.»
 - Argomenti (topics): `docker`, `github-actions`, `k6`, `laravel`, `mysql`, `performance`, `php`, `react`, `redis`, `vite`.
+- Immagine di anteprima: caricata il 2026-11-03 (1280×640 px, originale, solo testo e colori).
 - Il campo Website è vuoto: non c'è ancora un sito.
