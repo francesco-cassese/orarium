@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('unit', 8);
-            $table->unsignedInteger('price_cents');
+            $table->unsignedInteger('price_cents'); // Prezzo di una unità, in centesimi (vedi D-011).
             $table->timestamps();
         });
     }
