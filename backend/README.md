@@ -92,7 +92,7 @@ Ogni ingrediente ha i campi `id`, `name`, `unit` e `price_cents`. `price_cents` 
 
 Regole in scrittura (POST e PUT): `name` è obbligatorio, fino a 255 caratteri; `unit` è uno tra `g`, `kg`, `ml`, `l`, `pc`; `price_cents` è un intero da 0 a 4294967295. Con dati non validi la risposta è `422`; con un id che non esiste, `PUT` e `DELETE` rispondono `404`.
 
-Per provarlo, con `php artisan serve` avviato, apri [http://localhost:8000/api/v1/health](http://localhost:8000/api/v1/health) nel browser. Per la lista, apri [http://localhost:8000/api/v1/ingredients](http://localhost:8000/api/v1/ingredients): con il database appena creato, dopo `php artisan migrate`, risponde `{"data":[]}`. Per caricare gli ingredienti di esempio, lancia `php artisan migrate:fresh --seed`: crea 20.000 righe (`IngredientSeeder::COUNT`). I dati sono sempre gli stessi, perché il seme di Faker è fisso, e i nomi si ripetono: le combinazioni distinte sono 468 (39 ingredienti base per 12 varianti).
+Per provarlo, con `php artisan serve` avviato, apri [http://localhost:8000/api/v1/health](http://localhost:8000/api/v1/health) nel browser. Per la lista, apri [http://localhost:8000/api/v1/ingredients](http://localhost:8000/api/v1/ingredients): con il database appena creato, dopo `php artisan migrate`, risponde `{"data":[]}`. Per caricare gli ingredienti di esempio, lancia `php artisan migrate:fresh --seed`: crea 20.000 righe (`IngredientSeeder::COUNT`). I dati sono sempre gli stessi, perché il seme di Faker è fisso, e sono coerenti: ogni ingrediente ha la sua unità e le sue varianti, i nomi si ripetono e i nomi distinti sono 80.
 
 ## Comandi utili
 
