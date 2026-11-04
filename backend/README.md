@@ -84,8 +84,13 @@ Lo script del database di test non viene eseguito su un volume già esistente. H
 - `GET /api/v1/ingredients`: tutti gli ingredienti, in `data`, senza paginazione.
 - `GET /api/v1/ingredients?search=<testo>`: solo quelli il cui nome contiene il testo, senza distinguere maiuscole, con la collation predefinita di MySQL.
 - `GET /api/v1/ingredients/{id}`: un ingrediente, oppure `404` in JSON se l'id non esiste.
+- `POST /api/v1/ingredients`: crea un ingrediente (`name`, `unit`, `price_cents`) e risponde `201` con l'ingrediente in `data`.
+- `PUT /api/v1/ingredients/{id}`: aggiorna tutti i campi e risponde `200`.
+- `DELETE /api/v1/ingredients/{id}`: cancella e risponde `204`, senza corpo.
 
 Ogni ingrediente ha i campi `id`, `name`, `unit` e `price_cents`. `price_cents` è il prezzo di una unità, in centesimi (`120` = 1,20 € al chilo): vedi [D-011](../docs/DECISIONS.md).
+
+Regole in scrittura (POST e PUT): `name` è obbligatorio, fino a 255 caratteri; `unit` è uno tra `g`, `kg`, `ml`, `l`, `pc`; `price_cents` è un intero da 0 a 4294967295. Con dati non validi la risposta è `422`; con un id che non esiste, `PUT` e `DELETE` rispondono `404`.
 
 Per provarlo, con `php artisan serve` avviato, apri [http://localhost:8000/api/v1/health](http://localhost:8000/api/v1/health) nel browser. Per la lista, apri [http://localhost:8000/api/v1/ingredients](http://localhost:8000/api/v1/ingredients): con il database appena creato, dopo `php artisan migrate`, risponde `{"data":[]}`. Gli ingredienti di esempio arriveranno con un seeder: per ora la lista è vuota.
 
@@ -98,6 +103,7 @@ Dalla radice:
 
 Dalla cartella `backend/`:
 - `php artisan migrate:status`: mostra le migrazioni eseguite e verifica il collegamento al database.
+- `php artisan migrate`: da rilanciare dopo ogni aggiornamento che porta migrazioni nuove. Il database di sviluppo non si aggiorna da solo, e i test usano un database diverso (`orarium_test`).
 - `php artisan serve`: avvia il server di sviluppo su `http://localhost:8000`.
 - `composer check`: esegue in sequenza formattazione, analisi statica e test. È il controllo da lanciare prima di aprire una pull request: la CI lo rifarà.
 - `composer test`: esegue i test con Pest, dopo aver pulito la cache della configurazione. I test usano il database `orarium_test` su MySQL, quindi richiedono il servizio `db` acceso (`docker compose ps`).
