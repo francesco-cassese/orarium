@@ -87,7 +87,7 @@ Lo script del database di test non viene eseguito su un volume già esistente. H
 
 Ogni ingrediente ha i campi `id`, `name`, `unit` e `price_cents`. `price_cents` è il prezzo di una unità, in centesimi (`120` = 1,20 € al chilo): vedi [D-011](../docs/DECISIONS.md).
 
-Per provarlo, con `php artisan serve` avviato, apri [http://localhost:8000/api/v1/health](http://localhost:8000/api/v1/health) nel browser. Per la lista, apri [http://localhost:8000/api/v1/ingredients](http://localhost:8000/api/v1/ingredients): con il database appena creato, dopo `php artisan migrate`, risponde `{"data":[]}`. Gli ingredienti di esempio arriveranno con un seeder, in arrivo: per ora la lista è vuota.
+Per provarlo, con `php artisan serve` avviato, apri [http://localhost:8000/api/v1/health](http://localhost:8000/api/v1/health) nel browser. Per la lista, apri [http://localhost:8000/api/v1/ingredients](http://localhost:8000/api/v1/ingredients): con il database appena creato, dopo `php artisan migrate`, risponde `{"data":[]}`. Gli ingredienti di esempio arriveranno con un seeder: per ora la lista è vuota.
 
 ## Comandi utili
 
