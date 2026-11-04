@@ -92,7 +92,7 @@ Ogni ingrediente ha i campi `id`, `name`, `unit` e `price_cents`. `price_cents` 
 
 Regole in scrittura (POST e PUT): `name` è obbligatorio, fino a 255 caratteri; `unit` è uno tra `g`, `kg`, `ml`, `l`, `pc`; `price_cents` è un intero da 0 a 4294967295. Con dati non validi la risposta è `422`; con un id che non esiste, `PUT` e `DELETE` rispondono `404`.
 
-Per provarlo, con `php artisan serve` avviato, apri [http://localhost:8000/api/v1/health](http://localhost:8000/api/v1/health) nel browser. Per la lista, apri [http://localhost:8000/api/v1/ingredients](http://localhost:8000/api/v1/ingredients): con il database appena creato, dopo `php artisan migrate`, risponde `{"data":[]}`. Gli ingredienti di esempio arriveranno con un seeder: per ora la lista è vuota.
+Per provarlo, con `php artisan serve` avviato, apri [http://localhost:8000/api/v1/health](http://localhost:8000/api/v1/health) nel browser. Per la lista, apri [http://localhost:8000/api/v1/ingredients](http://localhost:8000/api/v1/ingredients): con il database appena creato, dopo `php artisan migrate`, risponde `{"data":[]}`. Per caricare gli ingredienti di esempio, lancia `php artisan migrate:fresh --seed`: crea 20.000 righe (`IngredientSeeder::COUNT`). I dati sono sempre gli stessi, perché il seme di Faker è fisso, e i nomi si ripetono: le combinazioni distinte sono 468 (39 ingredienti base per 12 varianti).
 
 ## Comandi utili
 
@@ -104,6 +104,7 @@ Dalla radice:
 Dalla cartella `backend/`:
 - `php artisan migrate:status`: mostra le migrazioni eseguite e verifica il collegamento al database.
 - `php artisan migrate`: da rilanciare dopo ogni aggiornamento che porta migrazioni nuove. Il database di sviluppo non si aggiorna da solo, e i test usano un database diverso (`orarium_test`).
+- `php artisan migrate:fresh --seed`: **cancella tutte le tabelle del database di sviluppo**, le ricrea e carica gli ingredienti di esempio. Rifiuta di girare in produzione. I test provano il seeder solo con poche righe, mai con 20.000.
 - `php artisan serve`: avvia il server di sviluppo su `http://localhost:8000`.
 - `composer check`: esegue in sequenza formattazione, analisi statica e test. È il controllo da lanciare prima di aprire una pull request: la CI lo rifarà.
 - `composer test`: esegue i test con Pest, dopo aver pulito la cache della configurazione. I test usano il database `orarium_test` su MySQL, quindi richiedono il servizio `db` acceso (`docker compose ps`).
