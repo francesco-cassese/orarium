@@ -44,6 +44,8 @@ entra nella documentazione delle prestazioni del frontend.
 **Rivalutare se.** Il CSS diventa troppo pesante, oppure personalizzare Bootstrap richiede più lavoro che scrivere
 stili propri.
 
+**Aggiornamento (4 novembre 2026).** Bootstrap 5.3.8 si importa con `@import` e usa ancora funzioni globali di Sass, quindi la regola «`@use` al posto di `@import`» vale per i nostri moduli e non per Bootstrap. In `frontend/src/styles/main.scss` si importano solo le parti usate; in `vite.config.js` sono silenziati gli avvisi di deprecazione `import`, `global-builtin`, `color-functions` e `if-function`, perché vengono dal codice di Bootstrap e rendevano illeggibile l'output della build (oltre 270 avvisi). Dart Sass 3.0 toglierà `@import`: `sass` è con `^1.x`, quindi non passa da solo alla 3.0. **Rivalutare se** esce una versione di Bootstrap che usa `@use`, oppure se `sass` deve salire alla 3.0.
+
 ## D-003 — Gestore di pacchetti del frontend (livello 0)
 
 **Contesto.** La CI reinstalla le dipendenze a ogni pull request. Velocità di installazione, occupazione su disco e
