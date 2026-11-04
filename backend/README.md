@@ -8,6 +8,7 @@ nella radice del repository.
 ## Requisiti
 
 - PHP `^8.4`, come indica `composer.json`. La CI usa PHP 8.4.
+- L'estensione `pdo_mysql` di PHP, per collegarsi al database MySQL. La CI la abilita nel workflow.
 - Composer
 - Docker Desktop
 
@@ -80,8 +81,13 @@ Lo script del database di test non viene eseguito su un volume già esistente. H
 ## Endpoint disponibili
 
 - `GET /api/v1/health`: risponde `{"status":"ok"}` se l'applicazione è in funzione. Non usa il database né Redis.
+- `GET /api/v1/ingredients`: tutti gli ingredienti, in `data`, senza paginazione.
+- `GET /api/v1/ingredients?search=<testo>`: solo quelli il cui nome contiene il testo, senza distinguere maiuscole, con la collation predefinita di MySQL.
+- `GET /api/v1/ingredients/{id}`: un ingrediente, oppure `404` in JSON se l'id non esiste.
 
-Per provarlo, con `php artisan serve` avviato, apri [http://localhost:8000/api/v1/health](http://localhost:8000/api/v1/health) nel browser.
+Ogni ingrediente ha i campi `id`, `name`, `unit` e `price_cents`. `price_cents` è il prezzo di una unità, in centesimi (`120` = 1,20 € al chilo): vedi [D-011](../docs/DECISIONS.md).
+
+Per provarlo, con `php artisan serve` avviato, apri [http://localhost:8000/api/v1/health](http://localhost:8000/api/v1/health) nel browser. Per la lista, apri [http://localhost:8000/api/v1/ingredients](http://localhost:8000/api/v1/ingredients): con il database appena creato, dopo `php artisan migrate`, risponde `{"data":[]}`. Gli ingredienti di esempio arriveranno con un seeder: per ora la lista è vuota.
 
 ## Comandi utili
 
