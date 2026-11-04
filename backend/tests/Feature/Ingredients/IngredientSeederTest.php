@@ -33,6 +33,29 @@ it('refuses to run in production and inserts nothing', function () {
     expect(Ingredient::count())->toBe(0);
 });
 
+// Ogni riga ha un nome e un'unità presi dalla lista del seeder: se qualcuno rimette un'unità a caso, il test diventa rosso.
+it('uses only names and units from the seeder list', function () {
+    app(IngredientSeeder::class)->run(200);
+
+    $allowed = [];
+    foreach (IngredientSeeder::INGREDIENTS as $entry) {
+        $unit = $entry['unit']->value;
+
+        if ($entry['variants'] === []) {
+            $allowed[$entry['name']] = $unit;
+        }
+
+        foreach ($entry['variants'] as $variant) {
+            $allowed[$entry['name'].' '.$variant] = $unit;
+        }
+    }
+
+    Ingredient::all()->each(function (Ingredient $row) use ($allowed) {
+        expect($allowed)->toHaveKey($row->name);
+        expect($row->unit->value)->toBe($allowed[$row->name]);
+    });
+});
+
 // 25 righe inserite a blocchi da 10: due blocchi da 10 e uno finale da 5. Tutte e 25 devono arrivare in tabella.
 // Se l'ultimo blocco più piccolo andasse perso, la tabella avrebbe 20 righe.
 it('inserts every row when the last chunk is smaller than the others', function () {
