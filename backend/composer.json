@@ -1,9 +1,9 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/laravel",
+    "name": "francesco-cassese/orarium",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
-    "keywords": ["laravel", "framework"],
+    "description": "Production planning and stock management for food workshops.",
+    "keywords": ["laravel", "production-planning", "stock"],
     "license": "MIT",
     "require": {
         "php": "^8.4",
