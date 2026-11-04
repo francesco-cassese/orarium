@@ -22,8 +22,8 @@ Le rotte sono in `backend/routes/api.php`. Gli esempi con «(route)» vengono da
 - **Prefisso e versione**: `/api/v1`, con la versione nel prefisso. Esempio: `GET /api/v1/health` (route).
 - **Nomi delle risorse**: plurale, minuscolo, con i trattini per le parole composte. Esempio: `GET /api/v1/ingredients` (route). Non c'è ancora un esempio con i trattini.
 - **Nomi dei campi JSON**: snake_case, come le colonne. Esempio: `price_cents` in `IngredientResource` (codice).
-- **Codici di risposta**: `200` per una lettura riuscita, `201` per una creazione, `204` per una cancellazione, `404` per un id che non esiste, `422` per dati non validi. `200` è nelle route `health` e `ingredients`; `404` è in `GET /api/v1/ingredients/{id}` (route). `201`, `204` e `422` sono previsti nella [#40](https://github.com/francesco-cassese/orarium/issues/40).
-- **Errori di validazione**: la forma standard di Laravel, senza inventarne un'altra. È un oggetto con `message` e `errors`, dove `errors` contiene per ogni campo la lista dei messaggi. Esempio previsto nella #40, con stato `422`: `{"message": "The name field is required.", "errors": {"name": ["The name field is required."]}}`.
+- **Codici di risposta**: `200` per una lettura riuscita, `201` per una creazione, `204` per una cancellazione, `404` per un id che non esiste, `422` per dati non validi. `200` è nelle route `health` e `ingredients`; `201` è in `POST /api/v1/ingredients` (route); `204` è in `DELETE /api/v1/ingredients/{id}` (route); `404` è in `GET /api/v1/ingredients/{id}` (route); `422` è negli errori di validazione (route).
+- **Errori di validazione**: la forma standard di Laravel, senza inventarne un'altra. È un oggetto con `message` e `errors`, dove `errors` contiene per ogni campo la lista dei messaggi. Esempio, con stato `422` (route): `{"message": "The name field is required. (and 2 more errors)", "errors": {"name": ["The name field is required."], "unit": ["The unit field is required."], "price_cents": ["The price cents field is required."]}}`. `message` mostra il primo errore e il numero degli altri.
 - **Date**: ISO 8601 in UTC, con microsecondi e la `Z` finale. Esempio di formato: `2026-11-02T10:00:00.000000Z`. È il formato che Laravel produce con `toJSON()` di Carbon; non c'è ancora una risposta con date.
 - **Risposte in JSON**: tutte le rotte `api/*` rispondono in JSON, anche senza l'intestazione `Accept` (`shouldRenderJsonWhen` in `backend/bootstrap/app.php`). Esempio: `GET /api/v1/inesistente` risponde `404` in JSON; una rotta fuori da `api/*` risponde in HTML.
 - **Non ancora deciso**: il formato della paginazione. Si decide con il miglioramento, dopo la misura.
@@ -31,7 +31,7 @@ Le rotte sono in `backend/routes/api.php`. Gli esempi con «(route)» vengono da
 ## Codice backend
 
 - **Controller**: singolare, `<Nome>Controller`, nella cartella della versione. Esempio: `HealthController` in `App\Http\Controllers\Api\V1` (codice).
-- **Form Request**: `Store<Nome>Request` e `Update<Nome>Request`. Esempio previsto nella #40: `StoreIngredientRequest`.
+- **Form Request**: `Store<Nome>Request` e `Update<Nome>Request`. Esempio: `StoreIngredientRequest` in `App\Http\Requests` (codice).
 - **Resource**: `<Nome>Resource`. Esempio: `IngredientResource` in `App\Http\Resources` (codice).
 - **Enum**: nome singolare, in `App\Enums`. Esempio: `Unit`, in `backend/app/Enums/Unit.php` (codice).
 - **Modelli**: singolare, PascalCase, corrispondente alla tabella al plurale. Esempio: `User` per la tabella `users` (`app/Models/User.php`, codice).
