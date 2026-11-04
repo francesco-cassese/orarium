@@ -38,7 +38,7 @@ it('uses only names and units from the seeder list', function () {
     app(IngredientSeeder::class)->run(200);
 
     $allowed = [];
-        foreach (IngredientSeeder::INGREDIENTS as $entry) {
+    foreach (IngredientSeeder::INGREDIENTS as $entry) {
         $unit = $entry['unit']->value;
 
         if ($entry['variants'] === []) {
