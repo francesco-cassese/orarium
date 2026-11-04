@@ -82,7 +82,7 @@ Lo script del database di test non viene eseguito su un volume già esistente. H
 
 - `GET /api/v1/health`: risponde `{"status":"ok"}` se l'applicazione è in funzione. Non usa il database né Redis.
 - `GET /api/v1/ingredients`: tutti gli ingredienti, in `data`, senza paginazione.
-- `GET /api/v1/ingredients?search=<testo>`: solo quelli il cui nome contiene il testo, senza distinguere maiuscole.
+- `GET /api/v1/ingredients?search=<testo>`: solo quelli il cui nome contiene il testo, senza distinguere maiuscole, con la collation predefinita di MySQL.
 - `GET /api/v1/ingredients/{id}`: un ingrediente, oppure `404` in JSON se l'id non esiste.
 
 Ogni ingrediente ha i campi `id`, `name`, `unit` e `price_cents`. `price_cents` è il prezzo di una unità, in centesimi (`120` = 1,20 € al chilo): vedi [D-011](../docs/DECISIONS.md).
