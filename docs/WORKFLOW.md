@@ -39,7 +39,7 @@ Formato: `<type>(<scope>): <description>`
 
 - Descrizione all'imperativo, in minuscolo, senza punto finale, massimo 72 caratteri.
 - Corpo opzionale per spiegare il *perché*, non il *cosa*.
-- Riferimento alla issue nel piè di pagina: `Refs #14` (nei commit) e `Closes #14` (nella PR).
+- Riferimento alla issue nel piè di pagina: `Closes #14` (nella PR).
 
 | Type | Quando |
 |---|---|
