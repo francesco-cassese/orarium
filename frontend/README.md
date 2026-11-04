@@ -18,11 +18,21 @@ Dalla cartella `frontend/`:
    ```
    pnpm install
    ```
-2. Avvia il server di sviluppo:
+2. Crea il file di configurazione locale a partire dall'esempio (il file `.env` non va su Git):
+
+   ```
+   Copy-Item .env.example .env
+   ```
+
+   Su Mac o Linux il comando è `cp .env.example .env`.
+
+   Il file contiene `VITE_API_BASE_URL`, l'indirizzo dell'API che il browser chiama. Le variabili con prefisso `VITE_` finiscono nel codice che arriva al browser: non metterci segreti.
+
+3. Avvia il server di sviluppo:
    ```
    pnpm dev
    ```
-3. Apri [http://localhost:5173](http://localhost:5173) nel browser.
+4. Apri [http://localhost:5173](http://localhost:5173) nel browser.
 
 ## Comandi utili
 
@@ -41,6 +51,8 @@ Dalla cartella `frontend/`:
 - `src/`: codice dell'applicazione. I test stanno accanto al file che verificano, con suffisso `.test.jsx` (ad esempio `App.test.jsx` per `App.jsx`). Vitest li riconosce dal nome.
 - `src/test/setup.js`: configurazione dei test, eseguita prima di ogni file di test.
 - `src/styles/main.scss`: gli stili dell'applicazione. Importa solo le parti di Bootstrap usate (D-002). Gli avvisi di deprecazione di Sass causati da Bootstrap 5.3 sono silenziati in `vite.config.js`, vedi D-002.
+- `src/api/`: le chiamate all'API del backend, con la forma delle risposte descritta in JSDoc (D-006).
+- `src/utils/`: funzioni semplici condivise, come `formatPrice` (da centesimi a euro).
 - `public/`: file statici serviti così come sono.
 - `eslint.config.js`: configurazione di ESLint.
 - `vite.config.js`: configurazione di Vite. Contiene anche la configurazione di Vitest, nella sezione `test`.
@@ -49,7 +61,9 @@ Dalla cartella `frontend/`:
 
 ## Backend
 
-Per ora il frontend non chiama il backend. Per avviare l'API e il database, segui [`../backend/README.md`](../backend/README.md).
+La pagina principale mostra la lista degli ingredienti chiamando `GET /api/v1/ingredients`: per vederla serve il backend acceso (`php artisan serve`, vedi [`../backend/README.md`](../backend/README.md)) con i dati di esempio (`php artisan migrate:fresh --seed`).
+
+In sviluppo il browser chiama l'API **direttamente**, a un indirizzo diverso da quello della pagina (porta 5173 contro 8000). Per il browser sono due origini diverse, quindi l'API deve autorizzarlo con le intestazioni CORS. Con la configurazione predefinita di Laravel la risposta contiene `Access-Control-Allow-Origin: *` (verificato con `curl`), cioè qualunque sito può leggerla: va bene in sviluppo, e va **ristretto prima del deploy**. Se l'origine autorizzata non coincide con quella della pagina, il browser scarta la risposta anche se il server ha risposto `200`, e la pagina mostra il messaggio di errore.
 
 ## Documentazione
 
