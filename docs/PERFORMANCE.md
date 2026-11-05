@@ -105,7 +105,7 @@ Misura di `GET /api/v1/ingredients` con il database di sviluppo pieno. È la ver
 - Server di Laravel: `php artisan serve` nella cartella `backend/`, porta 8000.
 - Server di controllo: `php -S 127.0.0.1:8001 -t <cartella fuori dal repository>`.
 - Strumento: k6 v2.3.0.
-- Commit misurato: `73673e8` su `main`, con le modifiche a `benchmarks/smoke.js` di questa PR.
+- Commit misurato: `73673e8`, con `benchmarks/smoke.js` modificato e non ancora committato durante le misure (opzioni `BASE_URL` e `DURATION`). La versione usata è quella di `7cb0b6b` (PR #71): in git il file ha lo stesso contenuto che aveva subito dopo le misure.
 
 ### Dataset
 
