@@ -36,6 +36,22 @@ it('shows the ingredients in a table', async () => {
   expect(screen.getByRole('cell', { name: /1,20/ })).toBeInTheDocument()
 })
 
+// I pezzi si mostrano come «pz»: `pc` è solo il codice dell'API. Le altre unità restano uguali.
+it('shows pieces as pz and keeps the other units', async () => {
+  fetch.mockReturnValue(
+    respondWith([
+      { id: 3, name: 'uova', unit: 'pc', price_cents: 30 },
+      { id: 4, name: 'farina 00', unit: 'kg', price_cents: 120 },
+    ]),
+  )
+
+  render(<IngredientList />)
+
+  expect(await screen.findByRole('cell', { name: 'pz' })).toBeInTheDocument()
+  expect(screen.queryByRole('cell', { name: 'pc' })).not.toBeInTheDocument()
+  expect(screen.getByRole('cell', { name: 'kg' })).toBeInTheDocument()
+})
+
 // Mentre la richiesta è in corso, la pagina mostra uno stato di caricamento.
 it('shows a loading state while the list is loading', () => {
   fetch.mockReturnValue(new Promise(() => {}))
