@@ -44,6 +44,6 @@ Le rotte sono in `backend/routes/api.php`. Gli esempi con «(route)» vengono da
 - **Test**: accanto al file, con nome `<Nome>.test.jsx`, con Vitest (D-007). Esempio: `App.test.jsx` (codice).
 - **Hook**: `use<Nome>`. Nessun esempio ancora.
 - **Stili**: file `*.module.scss` (D-002). Nessun esempio ancora.
-- **Campi dell'API**: si usano come arrivano, in snake_case, senza conversione in camelCase. Esempio previsto nella [#42](https://github.com/francesco-cassese/orarium/issues/42): `ingredient.price_cents`. Una conversione è codice in più da mantenere e da misurare. Il costo: nel JSX compaiono nomi che non seguono lo stile abituale di JavaScript.
+- **Campi dell'API**: nel frontend si scrivono con gli stessi nomi con cui li manda l'API, in snake_case, senza convertirli in camelCase. Esempio: `ingredient.price_cents` in `frontend/src/IngredientList.jsx` (codice). Una conversione è codice in più da mantenere e da misurare. Il costo: nel JSX compaiono nomi che non seguono lo stile abituale di JavaScript.
 - **Forma delle risposte**: descritta con commenti JSDoc vicino al codice che la usa, finché non c'è TypeScript (D-006).
-- **Non ancora deciso**: come si organizzano le cartelle, per tipo o per funzionalità. Si decide con la prima pagina, nella #42.
+- **Cartelle**: per tipo, dentro `frontend/src/`. Le chiamate all'API stanno in `src/api/` (esempio: `ingredients.js`), le funzioni semplici condivise in `src/utils/` (esempi: `formatPrice.js`, `formatUnit.js`). Le cartelle per funzionalità (`features/`) si rivalutano dal Livello 2.
