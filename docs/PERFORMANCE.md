@@ -43,8 +43,8 @@ Entrambi sono serviti da `php -S 127.0.0.1:8000 -t <cartella>`, con la cartella 
 Dalla cartella `benchmarks/`, con il server Laravel avviato:
 
 ```powershell
-k6 run -e ENDPOINT=/up --summary-export=results/up-runN.json smoke.js
-k6 run -e ENDPOINT=/api/v1/health --summary-export=results/health-runN.json smoke.js
+k6 run -e ENDPOINT=/up --summary-export=results/level-00/up-runN.json smoke.js
+k6 run -e ENDPOINT=/api/v1/health --summary-export=results/level-00/health-runN.json smoke.js
 ```
 
 Per i controlli, con il server di controllo avviato, aggiungi `-e PAUSE=0.1`.
@@ -132,11 +132,11 @@ Misura di `GET /api/v1/ingredients` con il database di sviluppo pieno. È la ver
 - Comandi, dalla cartella `benchmarks/`, dove `N` è il numero del giro:
 
 ```powershell
-k6 run -e ENDPOINT=/api/v1/ingredients -e DURATION=60s --summary-export=results/l01-list-runN.json smoke.js
-k6 run -e "ENDPOINT=/api/v1/ingredients?search=farina" -e DURATION=60s --summary-export=results/l01-search-runN.json smoke.js
-k6 run -e ENDPOINT=/api/v1/health --summary-export=results/l01-health-runN.json smoke.js
-k6 run -e BASE_URL=http://127.0.0.1:8001 -e ENDPOINT=/ok.html -e PAUSE=0.1 --summary-export=results/l01-ctrl-static-runN.json smoke.js
-k6 run -e BASE_URL=http://127.0.0.1:8001 -e ENDPOINT=/index.php -e PAUSE=0.1 --summary-export=results/l01-ctrl-php-runN.json smoke.js
+k6 run -e ENDPOINT=/api/v1/ingredients -e DURATION=60s --summary-export=results/level-01/list-runN.json smoke.js
+k6 run -e "ENDPOINT=/api/v1/ingredients?search=farina" -e DURATION=60s --summary-export=results/level-01/search-runN.json smoke.js
+k6 run -e ENDPOINT=/api/v1/health --summary-export=results/level-01/health-runN.json smoke.js
+k6 run -e BASE_URL=http://127.0.0.1:8001 -e ENDPOINT=/ok.html -e PAUSE=0.1 --summary-export=results/level-01/ctrl-static-runN.json smoke.js
+k6 run -e BASE_URL=http://127.0.0.1:8001 -e ENDPOINT=/index.php -e PAUSE=0.1 --summary-export=results/level-01/ctrl-php-runN.json smoke.js
 ```
 
 - Calcoli, come nel Livello 0:
