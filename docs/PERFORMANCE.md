@@ -85,7 +85,7 @@ Lettura preliminare: in questo ambiente lo script PHP minimo costa circa 2 ms e 
 ## Ipotesi da verificare nei livelli successivi
 
 Non sono risultati, ma domande da porre quando si ottimizza:
-- OPcache: non è stata verificata la sua configurazione.
+- OPcache: non è stata verificata la sua configurazione (nel Livello 1 risulta non caricata: vedi «Ambiente»).
 - Configurazione: Laravel legge i file di configurazione a ogni richiesta, se la cache non è attiva.
 - `APP_DEBUG=true`: il debug può costare tempo a ogni richiesta.
 - Server: `php artisan serve` è pensato per lo sviluppo, non per la produzione.
