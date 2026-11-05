@@ -52,7 +52,7 @@ Dalla cartella `frontend/`:
 - `src/test/setup.js`: configurazione dei test, eseguita prima di ogni file di test.
 - `src/styles/main.scss`: gli stili dell'applicazione. Importa solo le parti di Bootstrap usate (D-002). Gli avvisi di deprecazione di Sass causati da Bootstrap 5.3 sono silenziati in `vite.config.js`, vedi D-002.
 - `src/api/`: le chiamate all'API del backend, con la forma delle risposte descritta in JSDoc (D-006).
-- `src/utils/`: funzioni semplici condivise, come `formatPrice` (da centesimi a euro).
+- `src/utils/`: funzioni semplici condivise, come `formatPrice` (da centesimi a euro) e `formatUnit` (mostra `pc` come `pz`).
 - `public/`: file statici serviti così come sono.
 - `eslint.config.js`: configurazione di ESLint.
 - `vite.config.js`: configurazione di Vite. Contiene anche la configurazione di Vitest, nella sezione `test`.

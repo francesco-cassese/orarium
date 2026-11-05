@@ -60,4 +60,4 @@ Ho imparato più dagli errori che dalle cose andate bene. Questi sono gli episod
 
 ## Prossimo livello
 
-Il Livello 1 è la milestone `L01 Ingredients`: parte con una versione semplice e la sua misura di partenza.
+Il Livello 1 è la milestone `L01 Ingredients`, con una versione semplice già fatta: endpoint e pagina dell'elenco degli ingredienti, seeder con dati coerenti e misura di partenza dell'endpoint. Manca la misura di partenza della pagina.
