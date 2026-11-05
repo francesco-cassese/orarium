@@ -55,13 +55,13 @@ Lancia da PowerShell, oppure da Git Bash con `MSYS_NO_PATHCONV=1`. Senza questa 
 
 - Mediana e p95 di ogni corsa: campi `med` e `p(95)` di `http_req_duration`.
 - Errori: campo `passes` di `http_req_failed`, cioè le richieste fallite. Nei file, `fails` conta invece le richieste riuscite.
-- Riepilogo: mediana delle mediane delle corse misurate, con minimo e massimo.
+- Riepilogo: mediana tra le corse misurate, con minimo e massimo.
 
 ## Risultati
 
 Corse misurate: quattro per le rotte di Laravel, cinque per i controlli. Nessuna richiesta fallita in nessuna corsa misurata.
 
-| Livello | Mediana delle mediane | Min–max delle mediane | Mediana dei p95 |
+| Livello | Mediana tra le corse | Min–max tra le corse | Mediana dei p95 |
 |---|---|---|---|
 | File statico | 1.73 ms | 1.69–1.76 ms | 3.01 ms |
 | Script PHP minimo | 2.29 ms | 1.97–2.41 ms | 3.97 ms |
@@ -89,3 +89,87 @@ Non sono risultati, ma domande da porre quando si ottimizza:
 - Configurazione: Laravel legge i file di configurazione a ogni richiesta, se la cache non è attiva.
 - `APP_DEBUG=true`: il debug può costare tempo a ogni richiesta.
 - Server: `php artisan serve` è pensato per lo sviluppo, non per la produzione.
+
+## Livello 1: endpoint dell'elenco degli ingredienti (versione semplice)
+
+Misura di `GET /api/v1/ingredients` con il database di sviluppo pieno. È la versione semplice dell'endpoint: restituisce tutte le righe, senza paginazione.
+
+### Ambiente
+
+- Data delle corse: 2026-11-05, dalle 14:24 alle 14:39.
+- Computer, sistema e piano di alimentazione: gli stessi del Livello 0 (Windows 11 Home 10.0.26200, Intel Core 5 120U, RAM 15.6 GB, piano Bilanciato), con il portatile collegato alla corrente.
+- Programmi aperti: browser, Docker Desktop, terminale, VS Code.
+- PHP 8.4.27 NTS, Laravel 13.39.0, `APP_ENV=local`, `APP_DEBUG=true`.
+- OPcache non è caricata: `php -m` non la elenca.
+- L'estensione `curl` di PHP è bloccata da Windows: a ogni avvio di PHP compare un avviso. Non è stato verificato se incide sulle misure.
+- Server di Laravel: `php artisan serve` nella cartella `backend/`, porta 8000.
+- Server di controllo: `php -S 127.0.0.1:8001 -t <cartella fuori dal repository>`.
+- Strumento: k6 v2.3.0.
+- Commit misurato: `73673e8` su `main`, con le modifiche a `benchmarks/smoke.js` di questa PR.
+
+### Dataset
+
+- Database MySQL 8.4.13 in Docker, ricreato prima delle misure con `php artisan migrate:fresh --seed` (seeder `IngredientSeeder`, seme fisso: a ogni ricostruzione il dataset è lo stesso).
+- Righe: 20.000, con 80 nomi distinti.
+- Risposta dell'elenco (`GET /api/v1/ingredients`): 20.000 righe, 1.356.661 byte.
+- Ricerca `?search=farina`: 485 righe, 32.319 byte.
+
+### Metodo
+
+- Serie misurate:
+  - elenco, `/api/v1/ingredients`;
+  - ricerca, `/api/v1/ingredients?search=farina`;
+  - `/api/v1/health`, il «pavimento» di Laravel: serve a separare il costo dell'avvio da quello del lavoro dell'endpoint;
+  - i due controlli del Livello 0: `/ok.html` e `/index.php`.
+- Giri: sei, alternati nella stessa sessione, sempre nello stesso ordine (elenco, ricerca, health, file statico, script PHP). Il giro 1 è scartato come riscaldamento: restano cinque corse misurate per ogni serie. Nel Livello 0 erano quattro per Laravel e cinque per i controlli; ora sono cinque per tutte.
+- Un utente virtuale.
+- Durata: 60 secondi per elenco e ricerca, 10 secondi per gli altri. Con 10 secondi l'elenco faceva solo 5 richieste per corsa (corsa di prova: mediana 2.27 s), troppo poche per un p95.
+- Pausa di 0.1 secondi solo sui due controlli, come nel Livello 0.
+- `smoke.js` ha due opzioni nuove:
+  - `DURATION`, predefinita 10s;
+  - `BASE_URL`, predefinita la porta 8000, che accetta solo indirizzi locali.
+- Le due opzioni le ho provate prima con un valore non valido, che fa fallire la corsa senza richieste.
+- Comandi, dalla cartella `benchmarks/`, dove `N` è il numero del giro:
+
+```powershell
+k6 run -e ENDPOINT=/api/v1/ingredients -e DURATION=60s --summary-export=results/l01-list-runN.json smoke.js
+k6 run -e "ENDPOINT=/api/v1/ingredients?search=farina" -e DURATION=60s --summary-export=results/l01-search-runN.json smoke.js
+k6 run -e ENDPOINT=/api/v1/health --summary-export=results/l01-health-runN.json smoke.js
+k6 run -e BASE_URL=http://127.0.0.1:8001 -e ENDPOINT=/ok.html -e PAUSE=0.1 --summary-export=results/l01-ctrl-static-runN.json smoke.js
+k6 run -e BASE_URL=http://127.0.0.1:8001 -e ENDPOINT=/index.php -e PAUSE=0.1 --summary-export=results/l01-ctrl-php-runN.json smoke.js
+```
+
+- Calcoli, come nel Livello 0:
+  - mediana e p95 di ogni corsa: campi `med` e `p(95)` di `http_req_duration` nei file JSON;
+  - La mediana tra le corse è la mediana delle cinque mediane delle singole corse (giro 1 scartato come riscaldamento). Il min–max tra le corse sono il minimo e il massimo di quelle cinque mediane; la mediana dei p95 è la mediana dei cinque p95.
+- Errori: nessuna richiesta è fallita in nessuna delle 30 corse.
+
+### Risultati
+
+Cinque corse misurate per serie, trenta in totale.
+
+| Serie | Mediana tra le corse | Min–max tra le corse | Mediana dei p95 |
+|---|---|---|---|
+| Elenco | 2064.8 ms | 1567.6–2404.7 ms | 2469.4 ms |
+| Ricerca `farina` | 454.5 ms | 441.3–494.0 ms | 539.8 ms |
+| Laravel, `/api/v1/health` | 354.7 ms | 343.9–402.4 ms | 391.1 ms |
+| Script PHP minimo | 2.04 ms | 1.21–2.14 ms | 3.62 ms |
+| File statico | 1.44 ms | 0.81–1.60 ms | 3.43 ms |
+
+### Lettura
+
+Lettura preliminare, non verificata con un profiler.
+
+- I controlli di oggi sono veloci come nel Livello 0 (script PHP 2.04 ms contro 2.29 ms, file statico 1.44 ms contro 1.73 ms): il computer e il server di PHP vanno alla stessa velocità.
+- Laravel `/api/v1/health` oggi è 354.7 ms contro i 101.8 ms del Livello 0, circa 3.5 volte di più. La causa non è stata indagata. Quindi i numeri di Laravel del Livello 0 e di questo livello non sono confrontabili, e i miglioramenti si confrontano con questa baseline.
+- L'elenco costa circa 1710 ms più di `health` (2064.8 contro 354.7). La ricerca costa circa 100 ms più di `health`, anche se, senza un indice sul nome, il database dovrebbe guardare tutte le 20.000 righe (non verificato con `EXPLAIN`). Il costo sembra dipendere dalle righe restituite (20.000 contro 485) più che dalla ricerca nel database. È un'ipotesi: non è stato misurato dove va il tempo (query, creazione dei modelli, JSON).
+
+### Limiti e osservazioni
+
+- Un solo computer e una sola sessione. k6 e i server girano sullo stesso computer e si contendono la CPU.
+- L'elenco è molto variabile: le mediane vanno da 1567.6 ms (giro 6, 38 richieste) a 2404.7 ms (giro 5, 26 richieste), senza una causa nota.
+- Le serie da 10 secondi hanno poche richieste (`health`: 25–29 per corsa), quindi il loro p95 è approssimativo.
+- Laravel e controlli non hanno lo stesso ritmo (nessuna pausa contro 0.1 s), come nel Livello 0.
+- OPcache non caricata, `APP_DEBUG=true` e `curl` bloccato: l'effetto sulle misure non è stato verificato.
+- Una sola ricerca (`farina`) e una sola dimensione del dataset (20.000 righe): altri testi o altre dimensioni possono dare numeri diversi.
+- I riepiloghi sono calcolati dai file JSON con un comando che non è nel repository.
