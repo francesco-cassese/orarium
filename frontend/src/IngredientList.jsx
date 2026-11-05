@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import fetchIngredients from './api/ingredients.js'
 import formatPrice from './utils/formatPrice.js'
+import formatUnit from './utils/formatUnit.js'
 
 function IngredientList() {
   const [search, setSearch] = useState('')
@@ -66,7 +67,7 @@ function IngredientList() {
             {ingredients.map((ingredient) => (
               <tr key={ingredient.id}>
                 <td>{ingredient.name}</td>
-                <td>{ingredient.unit}</td>
+                <td>{formatUnit(ingredient.unit)}</td>
                 <td>{formatPrice(ingredient.price_cents)}</td>
               </tr>
             ))}
