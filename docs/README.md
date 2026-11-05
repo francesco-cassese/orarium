@@ -7,5 +7,5 @@
 | [DECISIONS.md](DECISIONS.md) | Registro delle decisioni tecniche, con opzioni valutate e condizioni di revisione |
 | [REPOSITORY-SETUP.md](REPOSITORY-SETUP.md) | Impostazioni da applicare una sola volta su GitHub |
 | [PERFORMANCE.md](PERFORMANCE.md) | Baseline del backend (Livello 0) e dell'endpoint dell'elenco ingredienti (Livello 1): ambiente, metodo, risultati e limiti delle misure |
-| [FRONTEND-PERF.md](FRONTEND-PERF.md) | Baseline del frontend: peso del bundle di produzione |
+| [FRONTEND-PERF.md](FRONTEND-PERF.md) | Baseline del frontend (Livello 0: peso del bundle) e della pagina dell'elenco (Livello 1): ambiente, metodo, risultati e limiti |
 | [levels/00-fondamenta.md](levels/00-fondamenta.md) | Documento del Livello 0: obiettivo, cosa è stato fatto, decisioni, misure, cosa ho imparato, limiti |

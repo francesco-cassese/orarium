@@ -28,7 +28,7 @@ La storia del progetto è nella cronologia dei commit, nelle issue e nelle pull 
 **Livello 0 — Fondamenta**, completato con il rilascio [`v0.0.1`](https://github.com/francesco-cassese/orarium/releases/tag/v0.0.1). Il documento del livello è in [`docs/levels/00-fondamenta.md`](docs/levels/00-fondamenta.md).
 
 - Completato: struttura del repository, processo di lavoro, modelli di issue e pull request, decisioni tecniche, backend Laravel di base, ambiente di sviluppo con MySQL e Redis in Docker, strumenti di qualità del backend (Pest, Pint, Larastan), frontend React di base (Vite), strumenti di qualità del frontend (ESLint, Prettier, Vitest), CI di frontend e backend (GitHub Actions), con i controlli richiesti prima del merge, baseline di prestazioni del backend e del frontend registrate in [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md) e [`docs/FRONTEND-PERF.md`](docs/FRONTEND-PERF.md).
-- In corso: Livello 1 (milestone `L01 Ingredients`), con una versione semplice già fatta: endpoint e pagina dell'elenco degli ingredienti, seeder con dati coerenti e misura di partenza dell'endpoint in `docs/PERFORMANCE.md`. Manca la misura di partenza della pagina.
+- In corso: Livello 1 (milestone `L01 Ingredients`), con una versione semplice già fatta: endpoint e pagina dell'elenco degli ingredienti, seeder con dati coerenti e misure di partenza dell'endpoint (`docs/PERFORMANCE.md`) e della pagina (`docs/FRONTEND-PERF.md`). Prossimo passo: il tag `level-01-naive`.
 
 ## Cosa guardare
 

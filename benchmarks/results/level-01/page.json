@@ -1,0 +1,111 @@
+{
+  "date": "2026-11-05T15:21:25.319Z",
+  "baseUrl": "http://127.0.0.1:4173",
+  "chromium": "156.0.8078.4",
+  "node": "v24.16.0",
+  "runs": [
+    {
+      "listMs": 2870.2189,
+      "listApiMs": 2310.1999999284744,
+      "keyMs": 1125.6299000000004,
+      "keyApiMs": 806.8000000715256,
+      "keyRows": 3983,
+      "domNodes": 80023,
+      "rows": 20000,
+      "requestsTypingFarina": 6
+    },
+    {
+      "listMs": 3165.9172,
+      "listApiMs": 2479.5,
+      "keyMs": 1217.1882000000005,
+      "keyApiMs": 839,
+      "keyRows": 3983,
+      "domNodes": 80023,
+      "rows": 20000,
+      "requestsTypingFarina": 6
+    },
+    {
+      "listMs": 2319.857600000003,
+      "listApiMs": 1797,
+      "keyMs": 873.0591999999997,
+      "keyApiMs": 724.1000000238419,
+      "keyRows": 3983,
+      "domNodes": 80023,
+      "rows": 20000,
+      "requestsTypingFarina": 6
+    },
+    {
+      "listMs": 2092.3647999999994,
+      "listApiMs": 1556.3999999761581,
+      "keyMs": 721.8731000000007,
+      "keyApiMs": 578.8999999761581,
+      "keyRows": 3983,
+      "domNodes": 80023,
+      "rows": 20000,
+      "requestsTypingFarina": 6
+    },
+    {
+      "listMs": 2156.693099999997,
+      "listApiMs": 1630.2000000476837,
+      "keyMs": 843.4089999999997,
+      "keyApiMs": 711.8000000715256,
+      "keyRows": 3983,
+      "domNodes": 80023,
+      "rows": 20000,
+      "requestsTypingFarina": 6
+    },
+    {
+      "listMs": 2613.976999999999,
+      "listApiMs": 2074,
+      "keyMs": 815.816899999998,
+      "keyApiMs": 675.5,
+      "keyRows": 3983,
+      "domNodes": 80023,
+      "rows": 20000,
+      "requestsTypingFarina": 6
+    }
+  ],
+  "discarded": "run 1",
+  "summary": {
+    "listMs": {
+      "median": 2319.857600000003,
+      "min": 2092.3647999999994,
+      "max": 3165.9172
+    },
+    "listApiMs": {
+      "median": 1797,
+      "min": 1556.3999999761581,
+      "max": 2479.5
+    },
+    "keyMs": {
+      "median": 843.4089999999997,
+      "min": 721.8731000000007,
+      "max": 1217.1882000000005
+    },
+    "keyApiMs": {
+      "median": 711.8000000715256,
+      "min": 578.8999999761581,
+      "max": 839
+    },
+    "keyRows": {
+      "median": 3983,
+      "min": 3983,
+      "max": 3983
+    },
+    "domNodes": {
+      "median": 80023,
+      "min": 80023,
+      "max": 80023
+    },
+    "rows": {
+      "median": 20000,
+      "min": 20000,
+      "max": 20000
+    },
+    "requestsTypingFarina": {
+      "median": 6,
+      "min": 6,
+      "max": 6
+    }
+  }
+}

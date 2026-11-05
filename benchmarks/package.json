@@ -1,0 +1,9 @@
+{
+  "name": "benchmarks",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.7.0",
+  "devDependencies": {
+    "playwright": "^1.64.1"
+  }
+}
