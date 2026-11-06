@@ -128,6 +128,8 @@ foreach ($scenarios as $name => $scenario) {
         'query_and_models' => measure(fn () => $query()->get()),
         'resources' => measure(fn () => IngredientResource::collection($models)->resolve($request($scenario['uri']))),
         'json_encode' => measure(fn () => json_encode(['data' => $resolved])),
+        'count_query' => measure(fn () => $query()->count()),
+        'first_page' => measure(fn () => $query()->orderBy('id')->limit(50)->get()),
         'full_request' => measure(fn () => $http->handle($request($scenario['uri']))->getContent()),
     ];
 }
