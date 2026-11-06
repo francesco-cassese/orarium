@@ -173,3 +173,33 @@ Lettura preliminare, non verificata con un profiler.
 - OPcache non caricata, `APP_DEBUG=true` e `curl` bloccato: l'effetto sulle misure non è stato verificato.
 - Una sola ricerca (`farina`) e una sola dimensione del dataset (20.000 righe): altri testi o altre dimensioni possono dare numeri diversi.
 - I riepiloghi sono calcolati dai file JSON con un comando che non è nel repository.
+
+## Indagine: il server di sviluppo a due velocità (issue #77)
+
+Nella baseline del Livello 0 l'endpoint `/api/v1/health` rispondeva con una mediana di circa 98 ms. Nelle sessioni successive la stessa rotta, con lo stesso codice, rispondeva in circa 340 ms. Questa sezione riassume cosa è stato escluso, cosa è stato osservato e quale regola ne segue.
+
+### Cosa è stato osservato
+
+- **Il codice non c'entra.** Il codice del Livello 0, rimesso in esecuzione, ha dato circa 332 ms nello stesso periodo.
+- **Gli altri sospetti sono esclusi come causa:** Docker, OPcache, porta, cartella di lavoro, maiuscole nel percorso, priorità del processo, moduli PHP caricati, reindirizzamento dell'output e variabili d'ambiente passate al processo.
+- **Il server ha due stati.** Con la stessa rotta e lo stesso codice, un processo risponde o in circa 98 ms o in circa 340 ms, con pochissima variazione dentro lo stesso stato.
+- **Il passaggio è reversibile e può essere rapido.** Nella prova `i2-artisan-windows-terminal` una corsa su sei è passata da 100,8 ms a 346,2 ms ed è tornata a 97,9 ms. Nella prova `o1-three` un `artisan serve` avviato da meno di tre minuti è stato veloce, mentre uno avviato circa quindici minuti prima, sullo stesso computer e nello stesso minuto, è stato lento.
+- **Il terminale di avvio non è la causa.** Nella prova `m1-pair` il server avviato da VS Code era lento e quello avviato dal Windows Terminal era veloce. Sei minuti dopo, nella prova `n1-direct`, i ruoli si erano invertiti.
+
+### Cosa non si sa
+
+Il meccanismo che fa passare un processo da uno stato all'altro. Non è stato trovato con le prove fatte e non è stato trattato come un problema del progetto.
+
+### Regola di misura
+
+Prima di ogni serie di misure:
+
+1. si avvia un server nuovo;
+2. si misura `/api/v1/health` prima e dopo la serie;
+3. se la mediana del controllo è intorno a 100 ms, il server è nello stato veloce e la serie vale; se è intorno a 340 ms, la serie si scarta e si riparte da un server nuovo.
+
+I numeri del Livello 1 pubblicati prima di questa regola potrebbero essere stati misurati nello stato lento. Verranno rifatti con la regola e confrontati con quelli vecchi.
+
+### Dati
+
+Le mediane di ogni corsa delle 21 prove valide sono in `benchmarks/results/level-01/health-investigation.json`.
