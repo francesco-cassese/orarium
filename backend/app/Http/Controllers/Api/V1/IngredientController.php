@@ -5,28 +5,30 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\IndexIngredientRequest;
 use App\Http\Requests\StoreIngredientRequest;
 use App\Http\Requests\UpdateIngredientRequest;
 use App\Http\Resources\IngredientResource;
 use App\Models\Ingredient;
-use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
 
 final class IngredientController extends Controller
 {
-    public function index(Request $request): AnonymousResourceCollection
+    public function index(IndexIngredientRequest $request): AnonymousResourceCollection
     {
-        $query = Ingredient::query();
+        $query = Ingredient::query()->orderBy('id');
 
-        $search = $request->string('search');
+        $search = $request->string('search')->toString();
 
-        if ($search->isNotEmpty()) {
+        if ($search !== '') {
             // Limite noto: % e _ nel testo cercato fanno da jolly.
             $query->where('name', 'like', '%'.$search.'%');
         }
 
-        return IngredientResource::collection($query->get());
+        return IngredientResource::collection(
+            $query->paginate($request->perPage())->withQueryString(),
+        );
     }
 
     public function show(Ingredient $ingredient): IngredientResource
