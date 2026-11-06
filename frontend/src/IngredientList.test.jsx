@@ -8,9 +8,12 @@ const ingredients = [
   { id: 2, name: 'burro fresco', unit: 'kg', price_cents: 950 },
 ]
 
-// Risposta simulata dell'API, nella stessa forma del backend: { data: [...] }.
-function respondWith(data) {
-  return Promise.resolve({ ok: true, json: () => Promise.resolve({ data }) })
+// Risposta simulata dell'API, nella stessa forma del backend: { data: [...], meta: { ... } }.
+function respondWith(data, meta = { current_page: 1, last_page: 1 }) {
+  return Promise.resolve({
+    ok: true,
+    json: () => Promise.resolve({ data, meta }),
+  })
 }
 
 beforeEach(() => {
@@ -81,6 +84,17 @@ it('asks the API with the search text', async () => {
   )
 
   expect(fetch).toHaveBeenLastCalledWith(
-    'http://api.test/api/v1/ingredients?search=farina%2000',
+    'http://api.test/api/v1/ingredients?search=farina+00&page=1',
+  )
+})
+
+// All'apertura la lista chiede la prima pagina.
+it('asks for the first page', function () {
+  fetch.mockReturnValue(respondWith(ingredients))
+
+  render(<IngredientList />)
+
+  expect(fetch).toHaveBeenCalledWith(
+    'http://api.test/api/v1/ingredients?page=1',
   )
 })
