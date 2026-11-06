@@ -92,57 +92,45 @@ Non sono risultati, ma domande da porre quando si ottimizza:
 
 ## Livello 1: endpoint dell'elenco degli ingredienti (versione semplice)
 
-Misura di `GET /api/v1/ingredients` con il database di sviluppo pieno. È la versione semplice dell'endpoint: restituisce tutte le righe, senza paginazione.
+Misura di `GET /api/v1/ingredients` con il database di sviluppo pieno. È la versione semplice dell'endpoint: restituisce tutte le righe, senza paginazione. Questa misura è stata rifatta il 2026-11-06 con la regola di controllo descritta nella sezione «Indagine»; la prima misura (2026-11-05) è riassunta in «Limiti e osservazioni» e non va usata come baseline.
 
 ### Ambiente
 
-- Data delle corse: 2026-11-05, dalle 14:24 alle 14:39.
-- Computer, sistema e piano di alimentazione: gli stessi del Livello 0 (Windows 11 Home 10.0.26200, Intel Core 5 120U, RAM 15.6 GB, piano Bilanciato), con il portatile collegato alla corrente.
-- Programmi aperti: browser, Docker Desktop, terminale, VS Code.
+- Data delle corse: 2026-11-06, dalle 01:40 alle 01:57 (ora italiana).
+- Computer, sistema e piano di alimentazione: gli stessi del Livello 0 (Windows 11 Home 10.0.26200, Intel Core 5 120U, RAM 15.6 GB, piano Bilanciato), con il portatile collegato alla corrente (dichiarato da chi ha misurato, non verificato con uno strumento). I programmi aperti non sono stati registrati.
 - PHP 8.4.27 NTS, Laravel 13.39.0, `APP_ENV=local`, `APP_DEBUG=true`.
 - OPcache non è caricata: `php -m` non la elenca.
-- L'estensione `curl` di PHP è bloccata da Windows: a ogni avvio di PHP compare un avviso. Non è stato verificato se incide sulle misure.
-- Server di Laravel: `php artisan serve` nella cartella `backend/`, porta 8000.
-- Server di controllo: `php -S 127.0.0.1:8001 -t <cartella fuori dal repository>`.
-- Strumento: k6 v2.3.0.
-- Commit misurato: `73673e8`, con `benchmarks/smoke.js` modificato e non ancora committato durante le misure (opzioni `BASE_URL` e `DURATION`). La versione usata è quella di `7cb0b6b` (PR #71): in git il file ha lo stesso contenuto che aveva subito dopo le misure.
+- Server di Laravel: `php artisan serve` nella cartella `backend/`, porta 8000, avviato dallo script in una finestra nascosta e nuovo a ogni giro.
+- Server di controllo: `php -S 127.0.0.1:8001 -t <cartella temporanea fuori dal repository>`, nuovo a ogni giro. La cartella contiene `ok.html` (il testo `ok`) e `index.php` (`<?php echo "ok";`). È stata ricreata il 2026-11-06: l'idea è quella del Livello 0, i file non sono gli stessi.
+- Strumento: k6 v2.3.0. Database: MySQL 8.4.13 in Docker.
+- Codice misurato: il backend di `main` (`b0a5fbd`). Lo script `benchmarks/measure.ps1` è quello del commit `2491f66`.
 
 ### Dataset
 
-- Database MySQL 8.4.13 in Docker, ricreato prima delle misure con `php artisan migrate:fresh --seed` (seeder `IngredientSeeder`, seme fisso: a ogni ricostruzione il dataset è lo stesso).
-- Righe: 20.000, con 80 nomi distinti.
-- Risposta dell'elenco (`GET /api/v1/ingredients`): 20.000 righe, 1.356.661 byte.
-- Ricerca `?search=farina`: 485 righe, 32.319 byte.
+- Database ricreato con `php artisan migrate:fresh --seed` (seeder `IngredientSeeder`, seme fisso: a ogni ricostruzione il dataset è lo stesso).
+- Righe verificate prima delle misure: 20.000, con 80 nomi distinti.
+- Risposta dell'elenco: 20.000 righe, 1.356.661 byte. Ricerca `?search=farina`: 485 righe, 32.319 byte. Questi due valori sono quelli della prima misura (stesso seme), non sono stati rimisurati.
 
 ### Metodo
 
-- Serie misurate:
+- Serie misurate, in quest'ordine in ogni giro:
+  - `/api/v1/health` (controllo prima);
   - elenco, `/api/v1/ingredients`;
   - ricerca, `/api/v1/ingredients?search=farina`;
-  - `/api/v1/health`, il «pavimento» di Laravel: serve a separare il costo dell'avvio da quello del lavoro dell'endpoint;
+  - `/api/v1/health` (controllo dopo);
   - i due controlli del Livello 0: `/ok.html` e `/index.php`.
-- Giri: sei, alternati nella stessa sessione, sempre nello stesso ordine (elenco, ricerca, health, file statico, script PHP). Il giro 1 è scartato come riscaldamento: restano cinque corse misurate per ogni serie. Nel Livello 0 erano quattro per Laravel e cinque per i controlli; ora sono cinque per tutte.
-- Un utente virtuale.
-- Durata: 60 secondi per elenco e ricerca, 10 secondi per gli altri. Con 10 secondi l'elenco faceva solo 5 richieste per corsa (corsa di prova: mediana 2.27 s), troppo poche per un p95.
-- Pausa di 0.1 secondi solo sui due controlli, come nel Livello 0.
-- `smoke.js` ha due opzioni nuove:
-  - `DURATION`, predefinita 10s;
-  - `BASE_URL`, predefinita la porta 8000, che accetta solo indirizzi locali.
-- Le due opzioni le ho provate prima con un valore non valido, che fa fallire la corsa senza richieste.
-- Comandi, dalla cartella `benchmarks/`, dove `N` è il numero del giro:
+- Giri: sei. Il giro 1 è scartato come riscaldamento: restano cinque corse misurate per ogni serie.
+- Regola di controllo: ogni giro parte da server nuovi (Laravel e controllo). Il giro vale solo se la mediana dei due `health` è sotto i 150 ms; altrimenti i suoi file sono rinominati con `-scartato` e il giro si ripete, fino a tre tentativi. In questa misura nessun giro è stato scartato.
+- Un utente virtuale. Durata: 60 secondi per elenco e ricerca, 10 secondi per le altre serie. Pausa di 0.1 secondi solo sui due controlli.
+- Comando, dalla radice del progetto, con il database acceso e nessun server sulle porte 8000 e 8001:
 
 ```powershell
-k6 run -e ENDPOINT=/api/v1/ingredients -e DURATION=60s --summary-export=results/level-01/list-runN.json smoke.js
-k6 run -e "ENDPOINT=/api/v1/ingredients?search=farina" -e DURATION=60s --summary-export=results/level-01/search-runN.json smoke.js
-k6 run -e ENDPOINT=/api/v1/health --summary-export=results/level-01/health-runN.json smoke.js
-k6 run -e BASE_URL=http://127.0.0.1:8001 -e ENDPOINT=/ok.html -e PAUSE=0.1 --summary-export=results/level-01/ctrl-static-runN.json smoke.js
-k6 run -e BASE_URL=http://127.0.0.1:8001 -e ENDPOINT=/index.php -e PAUSE=0.1 --summary-export=results/level-01/ctrl-php-runN.json smoke.js
+.\benchmarks\measure.ps1 -ControlDir <cartella con ok.html e index.php>
 ```
 
-- Calcoli, come nel Livello 0:
-  - mediana e p95 di ogni corsa: campi `med` e `p(95)` di `http_req_duration` nei file JSON;
-  - La mediana tra le corse è la mediana delle cinque mediane delle singole corse (giro 1 scartato come riscaldamento). Il min–max tra le corse sono il minimo e il massimo di quelle cinque mediane; la mediana dei p95 è la mediana dei cinque p95.
-- Errori: nessuna richiesta è fallita in nessuna delle 30 corse.
+- I risultati di ogni corsa sono in `benchmarks/results/level-01/rerun/` (36 file).
+- Calcoli, come nel Livello 0: mediana e p95 di ogni corsa dai campi `med` e `p(95)` di `http_req_duration`; la mediana tra le corse è la mediana delle cinque mediane dei giri 2–6; il min–max sono il minimo e il massimo di quelle cinque; la mediana dei p95 è la mediana dei cinque p95.
+- Errori: nessuna richiesta è fallita in nessuna delle 30 corse misurate.
 
 ### Risultati
 
@@ -150,27 +138,30 @@ Cinque corse misurate per serie, trenta in totale.
 
 | Serie | Mediana tra le corse | Min–max tra le corse | Mediana dei p95 |
 |---|---|---|---|
-| Elenco | 2064.8 ms | 1567.6–2404.7 ms | 2469.4 ms |
-| Ricerca `farina` | 454.5 ms | 441.3–494.0 ms | 539.8 ms |
-| Laravel, `/api/v1/health` | 354.7 ms | 343.9–402.4 ms | 391.1 ms |
-| Script PHP minimo | 2.04 ms | 1.21–2.14 ms | 3.62 ms |
-| File statico | 1.44 ms | 0.81–1.60 ms | 3.43 ms |
+| Elenco | 573.7 ms | 571.6–576.8 ms | 609.7 ms |
+| Ricerca `farina` | 141.2 ms | 140.6–141.4 ms | 167.6 ms |
+| Laravel, `/api/v1/health` prima | 98.3 ms | 97.9–99.1 ms | 102.5 ms |
+| Laravel, `/api/v1/health` dopo | 98.6 ms | 98.2–99.1 ms | 102.7 ms |
+| Script PHP minimo | 2.3 ms | 2.2–2.5 ms | 5.1 ms |
+| File statico | 1.5 ms | 1.5–1.7 ms | 3.8 ms |
 
 ### Lettura
 
 Lettura preliminare, non verificata con un profiler.
 
-- I controlli di oggi sono veloci come nel Livello 0 (script PHP 2.04 ms contro 2.29 ms, file statico 1.44 ms contro 1.73 ms): il computer e il server di PHP vanno alla stessa velocità.
-- Laravel `/api/v1/health` oggi è 354.7 ms contro i 101.8 ms del Livello 0, circa 3.5 volte di più. La causa non è stata indagata. Quindi i numeri di Laravel del Livello 0 e di questo livello non sono confrontabili, e i miglioramenti si confrontano con questa baseline.
-- L'elenco costa circa 1710 ms più di `health` (2064.8 contro 354.7). La ricerca costa circa 100 ms più di `health`, anche se, senza un indice sul nome, il database dovrebbe guardare tutte le 20.000 righe (non verificato con `EXPLAIN`). Il costo sembra dipendere dalle righe restituite (20.000 contro 485) più che dalla ricerca nel database. È un'ipotesi: non è stato misurato dove va il tempo (query, creazione dei modelli, JSON).
+- I due `health` stanno intorno a 98 ms in tutti i giri: il server è rimasto nello stato veloce. I controlli (script PHP 2.3 ms, file statico 1.5 ms) sono in linea con il Livello 0 (2.29 e 1.73 ms).
+- `health` è 98.3 ms contro i 101.8 ms del Livello 0: ora i due livelli sono confrontabili.
+- L'elenco costa circa 475 ms più di `health` (573.7 contro 98.3) e la ricerca circa 43 ms più (141.2 contro 98.3). Il costo sembra dipendere dalle righe restituite (20.000 contro 485) più che dalla ricerca nel database, anche se senza un indice sul nome il database dovrebbe guardare tutte le 20.000 righe (non verificato con `EXPLAIN`). È un'ipotesi: non è stato misurato dove va il tempo (query, creazione dei modelli, JSON).
+- La variazione tra giri è piccola: le mediane dell'elenco stanno in 5 ms (571.6–576.8). Nella prima misura stavano in 837 ms (1567.6–2404.7). È coerente con un server rimasto nello stato veloce, ma non è stato verificato.
 
 ### Limiti e osservazioni
 
+- **Prima misura, da non usare come baseline.** Il 2026-11-05, dalle 14:24 alle 14:39, la stessa procedura senza controlli aveva dato elenco 2064.8 ms, ricerca 454.5 ms, `health` 354.7 ms (circa 3.5 volte quello del Livello 0), script PHP 2.04 ms e file statico 1.44 ms. Era probabilmente il server nello stato lento descritto in «Indagine». I file di quella misura sono ancora in `benchmarks/results/level-01/` (`list-run*.json` e simili).
 - Un solo computer e una sola sessione. k6 e i server girano sullo stesso computer e si contendono la CPU.
-- L'elenco è molto variabile: le mediane vanno da 1567.6 ms (giro 6, 38 richieste) a 2404.7 ms (giro 5, 26 richieste), senza una causa nota.
-- Le serie da 10 secondi hanno poche richieste (`health`: 25–29 per corsa), quindi il loro p95 è approssimativo.
+- Il controllo vede lo stato del server solo prima e dopo elenco e ricerca: un passaggio di stato nel mezzo che si risolve prima del secondo controllo non verrebbe notato.
+- Le serie da 10 secondi hanno poche richieste, quindi il loro p95 è approssimativo.
 - Laravel e controlli non hanno lo stesso ritmo (nessuna pausa contro 0.1 s), come nel Livello 0.
-- OPcache non caricata, `APP_DEBUG=true` e `curl` bloccato: l'effetto sulle misure non è stato verificato.
+- OPcache non caricata e `APP_DEBUG=true`: l'effetto sulle misure non è stato verificato.
 - Una sola ricerca (`farina`) e una sola dimensione del dataset (20.000 righe): altri testi o altre dimensioni possono dare numeri diversi.
 - I riepiloghi sono calcolati dai file JSON con un comando che non è nel repository.
 
@@ -182,7 +173,7 @@ Nella baseline del Livello 0 l'endpoint `/api/v1/health` rispondeva con una medi
 
 - **Il codice non c'entra.** Il codice del Livello 0, rimesso in esecuzione, ha dato circa 332 ms nello stesso periodo.
 - **Gli altri sospetti sono esclusi come causa:** Docker, OPcache, porta, cartella di lavoro, maiuscole nel percorso, priorità del processo, moduli PHP caricati, reindirizzamento dell'output e variabili d'ambiente passate al processo.
-- **Il server ha due stati.** Con la stessa rotta e lo stesso codice, un processo risponde o in circa 98 ms o in circa 340 ms, con pochissima variazione dentro lo stesso stato.
+- **Il rallentamento riguarda tutto il lavoro di PHP, non solo `health`.** Confrontando la prima misura del Livello 1 (stato lento) con quella rifatta (stato veloce): `health` 354.7 contro 98.3 ms (3.6 volte), ricerca 454.5 contro 141.2 ms (3.2 volte), elenco 2064.8 contro 573.7 ms (3.6 volte). Sono sessioni diverse, quindi è un confronto indicativo e non una misura del meccanismo.
 - **Il passaggio è reversibile e può essere rapido.** Nella prova `i2-artisan-windows-terminal` una corsa su sei è passata da 100,8 ms a 346,2 ms ed è tornata a 97,9 ms. Nella prova `o1-three` un `artisan serve` avviato da meno di tre minuti è stato veloce, mentre uno avviato circa quindici minuti prima, sullo stesso computer e nello stesso minuto, è stato lento.
 - **Il terminale di avvio non è la causa.** Nella prova `m1-pair` il server avviato da VS Code era lento e quello avviato dal Windows Terminal era veloce. Sei minuti dopo, nella prova `n1-direct`, i ruoli si erano invertiti.
 
@@ -198,7 +189,7 @@ Prima di ogni serie di misure:
 2. si misura `/api/v1/health` prima e dopo la serie;
 3. se la mediana del controllo è intorno a 100 ms, il server è nello stato veloce e la serie vale; se è intorno a 340 ms, la serie si scarta e si riparte da un server nuovo.
 
-I numeri del Livello 1 pubblicati prima di questa regola potrebbero essere stati misurati nello stato lento. Verranno rifatti con la regola e confrontati con quelli vecchi.
+I numeri del Livello 1 del 2026-11-05, presi prima di questa regola, sono stati rifatti il 2026-11-06 con la regola (issue #79). Quelli vecchi restano nei file e sono descritti come limite nelle sezioni del Livello 1; non sono una baseline.
 
 ### Dati
 
