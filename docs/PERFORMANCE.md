@@ -151,7 +151,7 @@ Lettura preliminare, non verificata con un profiler.
 
 - I due `health` stanno intorno a 98 ms in tutti i giri: il server è rimasto nello stato veloce. I controlli (script PHP 2.3 ms, file statico 1.5 ms) sono in linea con il Livello 0 (2.29 e 1.73 ms).
 - `health` è 98.3 ms contro i 101.8 ms del Livello 0: ora i due livelli sono confrontabili.
-- L'elenco costa circa 475 ms più di `health` (573.7 contro 98.3) e la ricerca circa 43 ms più (141.2 contro 98.3). Il costo sembra dipendere dalle righe restituite (20.000 contro 485) più che dalla ricerca nel database, anche se senza un indice sul nome il database dovrebbe guardare tutte le 20.000 righe (non verificato con `EXPLAIN`). È un'ipotesi: non è stato misurato dove va il tempo (query, creazione dei modelli, JSON).
+- L'elenco costa circa 475 ms più di `health` (573.7 contro 98.3) e la ricerca circa 43 ms più (141.2 contro 98.3). Dove va il tempo è misurato nella sezione «Diagnosi» qui sotto: il costo dipende dalle righe restituite, non dalla ricerca nel database.
 - La variazione tra giri è piccola: le mediane dell'elenco stanno in 5 ms (571.6–576.8). Nella prima misura stavano in 837 ms (1567.6–2404.7). È coerente con un server rimasto nello stato veloce, ma non è stato verificato.
 
 ### Limiti e osservazioni
@@ -164,6 +164,74 @@ Lettura preliminare, non verificata con un profiler.
 - OPcache non caricata e `APP_DEBUG=true`: l'effetto sulle misure non è stato verificato.
 - Una sola ricerca (`farina`) e una sola dimensione del dataset (20.000 righe): altri testi o altre dimensioni possono dare numeri diversi.
 - I riepiloghi sono calcolati dai file JSON con un comando che non è nel repository.
+
+### Diagnosi: dove va il tempo (issue #81)
+
+Misura fatta con `benchmarks/profile-list.php`, che esegue l'applicazione in un solo processo PHP, senza server web, sul database di sviluppo. Questa sezione dice dove va il tempo; non cambia nessun codice dell'applicazione.
+
+**Ambiente e dataset.** Come sopra: PHP 8.4.27, Laravel 13.39.0, `APP_ENV=local`, OPcache non caricata, MySQL 8.4.13 in Docker, 20.000 righe. Data: 2026-11-06, intorno alle 02:53 (ora italiana). Script del commit `2688d87`.
+
+**Metodo.**
+
+- Sei processi di seguito, uno per corsa; il primo è scartato come riscaldamento e restano cinque corse.
+- In ogni processo l'avvio dell'applicazione è misurato una volta. Ogni passo ha un riscaldamento scartato e cinque ripetizioni, di cui si registra la mediana, con il picco di memoria (`memory_reset_peak_usage`).
+- Passi:
+  - query grezza (`DB::select`);
+  - query con creazione dei modelli (`Ingredient::query()->get()`);
+  - trasformazione in risorse (`IngredientResource::collection(...)->resolve()`);
+  - `json_encode`;
+  - richiesta completa passata dal kernel HTTP.
+  - Come controllo, senza database: `/api/v1/health` passata dal kernel.
+- Il costo di creare i modelli è la differenza tra «query con modelli» e «query grezza». Il «resto» è la differenza tra la richiesta completa e la somma di query con modelli, risorse e JSON. Sono differenze, non misure dirette.
+- Comando, dalla radice del progetto: `php benchmarks/profile-list.php --out=<file>`. I risultati sono in `benchmarks/results/level-01/diagnosis/`.
+- Il riepilogo è la mediana tra le cinque corse delle mediane dei passi, con minimo e massimo.
+
+**Risultati.** Avvio dell'applicazione (una volta per processo): 131.08 ms (min–max 130.69–143.90). Richiesta `health` dentro il processo: 0.30 ms (0.28–0.34).
+
+Elenco, 20.000 righe, risposta di 1.356.661 byte:
+
+| Passo | Mediana | Min–max | Quota della richiesta | Picco di memoria |
+|---|---|---|---|---|
+| Query grezza | 26.94 ms | 24.61–28.80 ms | 5.7% | 13.43 MB |
+| Creazione dei modelli (differenza) | 240.47 ms | — | 50.6% | — |
+| Trasformazione in risorse | 189.26 ms | 189.12–190.90 ms | 39.8% | 11.33 MB |
+| Codifica JSON | 2.88 ms | 2.75–2.92 ms | 0.6% | 1.30 MB |
+| Resto (differenza) | 15.53 ms | — | 3.3% | — |
+| **Richiesta completa** | **475.08 ms** | 466.30–483.85 ms | 100% | 41.79 MB |
+
+La «query con modelli» misurata direttamente è 267.41 ms (249.76–269.19 ms), con 31.94 MB.
+
+Ricerca `farina`, 485 righe, risposta di 32.319 byte:
+
+| Passo | Mediana | Min–max | Quota della richiesta | Picco di memoria |
+|---|---|---|---|---|
+| Query grezza | 6.18 ms | 6.05–6.84 ms | 34.1% | 0.36 MB |
+| Creazione dei modelli (differenza) | 6.06 ms | — | 33.4% | — |
+| Trasformazione in risorse | 4.61 ms | 4.50–4.66 ms | 25.4% | 0.28 MB |
+| Codifica JSON | 0.06 ms | 0.06–0.06 ms | 0.3% | 0.03 MB |
+| Resto (differenza) | 1.22 ms | — | 6.7% | — |
+| **Richiesta completa** | **18.13 ms** | 17.75–32.83 ms | 100% | 1.03 MB |
+
+La «query con modelli» misurata direttamente è 12.24 ms (11.97–12.44 ms), con 0.79 MB.
+
+**Piano di esecuzione della ricerca.** `EXPLAIN`: `type` `ALL`, nessuna chiave (`key` `NULL`), stima di 19588 righe, `filtered` 11.11%, `Using where`. `EXPLAIN ANALYZE`: scansione della tabella di 20.000 righe in 2.83 ms e filtro in 5.84 ms in totale, con 485 righe restituite. La documentazione di MySQL 8.4 dice che un indice B-tree si usa con `LIKE` solo se la stringa costante non inizia con un carattere jolly (esempio che non lo usa: `LIKE '%Patrick%'`) e che per `LIKE '%stringa%'` con una stringa di più di tre caratteri MySQL usa l'algoritmo Turbo Boyer-Moore ([MySQL 8.4, Comparison of B-Tree and Hash Indexes](https://dev.mysql.com/doc/refman/8.4/en/index-btree-hash.html)).
+
+**Lettura.**
+
+- Circa il 90% del tempo dell'elenco è lavoro di PHP per riga: creare i modelli (50.6%, circa 12.0 µs a riga) e trasformarli in risorse (39.8%, circa 9.5 µs a riga). La query è il 5.7% e la codifica JSON lo 0.6%.
+- Il costo per riga è quasi lo stesso nella ricerca (circa 12.5 µs per i modelli e 9.5 µs per le risorse): cresce in modo lineare con le righe restituite.
+- Nella ricerca il database costa circa 6 ms anche con la scansione completa della tabella. Con `LIKE '%testo%'` un indice sul nome non verrebbe usato (documentazione citata sopra), quindi a questa dimensione non è dove cercare un miglioramento.
+- Coerenza con k6: `health` (98.3 ms) più la richiesta completa dell'elenco (475.1 ms) dà 573.4 ms, contro i 573.7 ms misurati sul server. Per la ricerca la somma (98.3 più 18.1, cioè 116.4 ms) è invece sotto i 141.2 ms misurati: restano circa 25 ms non spiegati. Un sospetto sono i costi a freddo di una richiesta vera (connessione al database, caricamento delle classi), che qui sono scartati dal riscaldamento; non è stato verificato.
+- L'avvio dell'applicazione costa 131 ms in questo processo da riga di comando; sul server `health` costa 98 ms. Non sono la stessa misura e non vanno confrontati.
+- Il picco di memoria dell'elenco è 41.79 MB per 20.000 righe.
+- Il costo fisso di una richiesta non dipende dalle righe: `health` costa 98.3 ms sul server. La parte che dipende dalle righe dell'elenco, misurata nel processo, è di 475.1 ms.
+
+**Limiti della diagnosi.**
+
+- Un processo da riga di comando non è il server web: non c'è l'avvio dell'applicazione per ogni richiesta e le ripetizioni dentro un processo usano una cache calda.
+- Un solo computer e una sola sessione. Cinque ripetizioni per corsa e cinque corse. Nella richiesta completa della ricerca una corsa ha un massimo di 32.83 ms contro una mediana di 18.13 ms: non indagato.
+- Creazione dei modelli e «resto» sono differenze, non misure dirette.
+- Il riepilogo è calcolato dai file JSON con un comando che non è nel repository.
 
 ## Indagine: il server di sviluppo a due velocità (issue #77)
 
