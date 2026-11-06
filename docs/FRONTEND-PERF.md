@@ -31,23 +31,22 @@ Due `pnpm build` consecutivi hanno prodotto gli stessi valori: stessa dimensione
 
 ## Livello 1: pagina dell'elenco degli ingredienti (versione semplice)
 
-Misura della pagina dell'elenco con il database di sviluppo pieno. È la versione semplice della pagina: scarica tutte le righe, le mostra tutte in una tabella, senza paginazione, e a ogni tasto nel campo di ricerca fa una richiesta all'API, senza attendere.
+Misura della pagina dell'elenco con il database di sviluppo pieno. È la versione semplice della pagina: scarica tutte le righe, le mostra tutte in una tabella, senza paginazione, e a ogni tasto nel campo di ricerca fa una richiesta all'API, senza attendere. Questa misura è stata rifatta il 2026-11-06 con la regola di controllo descritta in [`PERFORMANCE.md`](PERFORMANCE.md) (sezione «Indagine»); la prima misura (2026-11-05) è riassunta in «Limiti e osservazioni» e non va usata come baseline.
 
 ### Ambiente
 
-- Data delle corse: 2026-11-05, alle 16:21 (ora italiana).
-- Computer, sistema e piano di alimentazione: gli stessi della baseline dell'endpoint in [`PERFORMANCE.md`](PERFORMANCE.md) (Windows 11 Home 10.0.26200, Intel Core 5 120U, RAM 15.6 GB, piano Bilanciato), con il portatile collegato alla corrente.
-- Programmi aperti: browser, Docker Desktop, terminale, VS Code.
+- Data della serie: 2026-11-06, intorno alle 02:03 (ora italiana).
+- Computer, sistema e piano di alimentazione: gli stessi della baseline dell'endpoint in [`PERFORMANCE.md`](PERFORMANCE.md) (Windows 11 Home 10.0.26200, Intel Core 5 120U, RAM 15.6 GB, piano Bilanciato), con il portatile collegato alla corrente (dichiarato da chi ha misurato, non verificato con uno strumento). I programmi aperti non sono stati registrati.
 - Browser: Chromium 156.0.8078.4, quello di Playwright 1.64.1, in modalità senza finestra (`headless`, il valore predefinito di Playwright). Dimensione della finestra: quella predefinita di Playwright, non registrata.
 - Rete e CPU: nessuna limitazione. Tutto gira su `127.0.0.1`.
-- Node v24.16.0, pnpm 11.7.0.
-- Pagina: build di produzione (`pnpm build`), servita con `pnpm preview` su `127.0.0.1:4173`.
-- Backend: Laravel con `php artisan serve` sulla porta 8000, lo stesso ambiente della baseline dell'endpoint (vedi [`PERFORMANCE.md`](PERFORMANCE.md)).
-- Commit misurato: `06254cc` su `main`. Lo script `benchmarks/page.mjs` e `benchmarks/package.json` sono quelli di questa modifica: erano già nel repository, in un commit di questa PR, prima della corsa.
+- Node v24.16.0 (rilevato dallo script). La versione di pnpm non è stata rilevata in questa serie.
+- Pagina: build di produzione (`pnpm build`), servita con `pnpm preview` su `127.0.0.1:4173`, avviata dallo script e nuova a ogni tentativo.
+- Backend: Laravel con `php artisan serve` sulla porta 8000, avviato dallo script in una finestra nascosta e nuovo a ogni tentativo. Ambiente come nella baseline dell'endpoint (PHP 8.4.27, Laravel 13.39.0, `APP_ENV=local`, `APP_DEBUG=true`, OPcache non caricata).
+- Codice misurato: quello di `main` (`b0a5fbd`). Lo script `benchmarks/measure-page.ps1` è quello del commit `a90aeae`, committato dopo la serie con lo stesso contenuto.
 
 ### Dataset
 
-- Database MySQL in Docker, con 20.000 ingredienti dal seeder `IngredientSeeder` (seme fisso): `GET /api/v1/ingredients` restituisce 20.000 righe.
+- Database MySQL in Docker, con 20.000 ingredienti dal seeder `IngredientSeeder` (seme fisso): `GET /api/v1/ingredients` restituisce 20.000 righe (verificato nelle misure: `rows` vale 20000).
 - La ricerca `f` restituisce 3.983 righe (misurato dallo script).
 
 ### Metodo
@@ -63,25 +62,20 @@ Misura della pagina dell'elenco con il database di sviluppo pieno. È la version
   - `domNodes`: `document.querySelectorAll('*').length` a lista pronta; `rows`: righe della tabella.
   - `requestsTypingFarina`: richieste all'API scrivendo `farina` in una pagina nuova, senza pausa tra i tasti.
 - Il riepilogo è la mediana tra le corse misurate, con minimo e massimo, come per le misure dell'endpoint.
-- Comandi (la prima volta si installano pacchetti e browser; i server di Laravel e del database devono essere accesi):
+- Regola di controllo: lo script avvia server nuovi, misura `/api/v1/health` con k6 per 10 secondi prima e dopo la serie di sei corse, e la serie vale solo se le due mediane sono sotto i 150 ms. Altrimenti i file si rinominano con `-scartato` e la serie si ripete, fino a tre tentativi. In questa serie il primo tentativo era valido.
+- Comando, dalla radice del progetto, con il database acceso e nessun server sulle porte 8000 e 4173 (la prima volta servono `pnpm install` e `pnpm exec playwright install chromium` nella cartella `benchmarks/`):
 
 ```powershell
-cd benchmarks
-pnpm install
-pnpm exec playwright install chromium
-cd ../frontend
-pnpm build
-pnpm preview --host 127.0.0.1 --port 4173 --strictPort   # in un secondo terminale
-cd ../benchmarks
-node page.mjs
+cd frontend; pnpm build; cd ..
+.\benchmarks\measure-page.ps1
 ```
 
-- Opzioni dello script: `BASE_URL` (solo indirizzi locali, predefinito `http://127.0.0.1:4173`), `RUNS` (predefinito 6), `OUT` (predefinito `results/level-01/page.json`).
-- I valori grezzi di tutte le corse e il riepilogo sono in `benchmarks/results/level-01/page.json`.
+- Opzioni di `page.mjs`: `BASE_URL` (solo indirizzi locali, predefinito `http://127.0.0.1:4173`), `RUNS` (predefinito 6), `OUT` (impostato dallo script).
+- I valori grezzi di tutte le corse e il riepilogo sono in `benchmarks/results/level-01/rerun/page.json`; i due controlli in `page-health-before.json` e `page-health-after.json`, nella stessa cartella.
 
 ### Risultati
 
-Bundle di produzione, rifatto con `pnpm build` (due build consecutive hanno dato gli stessi nomi e le stesse dimensioni):
+Bundle di produzione, rifatto con `pnpm build` (stessi nomi e dimensioni della prima misura):
 
 | File | Dimensione | Gzip |
 |---|---|---|
@@ -91,14 +85,16 @@ Bundle di produzione, rifatto con `pnpm build` (due build consecutive hanno dato
 
 Il build trasforma 20 moduli. Nel Livello 0 erano 15 moduli e nessun file CSS, con un file JavaScript da 219.68 kB (68.66 kB gzip).
 
+Controllo: `/api/v1/health` 98.1 ms prima e 98.4 ms dopo (mediana di una corsa da 10 secondi ciascuna).
+
 Pagina, cinque corse misurate:
 
 | Misura | Mediana | Min–max |
 |---|---|---|
-| Lista a schermo (`listMs`) | 2319.9 ms | 2092.4–3165.9 ms |
-| di cui richiesta dell'elenco (`listApiMs`) | 1797.0 ms | 1556.4–2479.5 ms |
-| Dopo un tasto (`keyMs`) | 843.4 ms | 721.9–1217.2 ms |
-| di cui richiesta della ricerca (`keyApiMs`) | 711.8 ms | 578.9–839.0 ms |
+| Lista a schermo (`listMs`) | 1142.6 ms | 1132.2–1158.4 ms |
+| di cui richiesta dell'elenco (`listApiMs`) | 598.7 ms | 591.0–622.1 ms |
+| Dopo un tasto (`keyMs`) | 391.7 ms | 373.9–425.2 ms |
+| di cui richiesta della ricerca (`keyApiMs`) | 242.2 ms | 238.6–260.9 ms |
 | Nodi DOM | 80023 | 80023–80023 |
 | Righe della tabella | 20000 | 20000–20000 |
 | Richieste scrivendo `farina` | 6 | 6–6 |
@@ -107,18 +103,22 @@ Pagina, cinque corse misurate:
 
 Lettura preliminare, non verificata con un profiler.
 
-- Circa tre quarti del tempo per la lista a schermo è l'attesa dell'API (1797.0 su 2319.9 ms, differenza tra due mediane). La differenza tra `listMs` e `listApiMs`, calcolata a mano corsa per corsa (corse 2–6), ha mediana 536 ms (min–max 523–686 ms): è il tempo dopo l'arrivo dei dati, con i dati da elaborare e la tabella da disegnare.
-- La variazione tra corse sta soprattutto nella risposta dell'API: la corsa più lenta (corsa 2, 3165.9 ms) ha anche la richiesta più lunga (2479.5 ms), mentre la differenza è alta solo in quella corsa (686 ms contro 523–540 ms). La causa della variazione non è stata indagata.
-- Dopo un tasto la differenza tra `keyMs` e `keyApiMs` ha mediana 143 ms (min–max 132–378 ms, calcolata a mano come sopra) per 3.983 righe.
+- Poco più della metà del tempo per la lista a schermo è l'attesa dell'API (598.7 su 1142.6 ms, differenza tra due mediane). La differenza tra `listMs` e `listApiMs`, calcolata corsa per corsa (corse 2–6), ha mediana 541.2 ms (min–max 530.9–543.9 ms): è il tempo dopo l'arrivo dei dati, con i dati da elaborare e la tabella da disegnare.
+- La variazione tra corse è piccola: `listMs` sta in 26 ms (1132.2–1158.4).
+- Dopo un tasto la differenza tra `keyMs` e `keyApiMs` ha mediana 139.6 ms (min–max 131.7–164.3 ms, calcolata come sopra) per 3.983 righe.
+- La richiesta dell'elenco vista dal browser (598.7 ms) è vicina alla mediana di k6 sull'endpoint (573.7 ms, in [`PERFORMANCE.md`](PERFORMANCE.md)). La differenza di circa 25 ms non è stata indagata.
+- Il tempo dopo l'arrivo dei dati è praticamente uguale a quello della prima misura (541 contro 536 ms per la lista, 140 contro 143 ms per il tasto), mentre le richieste all'API sono circa tre volte più veloci (598.7 contro 1797.0 ms, 242.2 contro 711.8 ms). È coerente con un rallentamento solo lato server nella prima misura.
 - La pagina ha 80023 nodi DOM, cioè 4 per riga (una riga e tre celle) per 20.000 righe, più 23 nodi fissi.
 - Scrivendo `farina` partono 6 richieste, una per lettera: la pagina non aspetta che chi scrive finisca.
 
 ### Limiti e osservazioni
 
-- Un solo computer, una sola sessione registrata, cinque corse misurate. Due prove precedenti non registrate (stessa configurazione) hanno dato mediane vicine: `listMs` 2522 e 2337 ms, `keyMs` 1074 e 872 ms. Tra sessioni i valori possono cambiare di circa il 10%.
+- **Prima misura, da non usare come baseline.** Il 2026-11-05, alle 16:21, la stessa procedura senza controlli aveva dato `listMs` 2319.9 ms, `listApiMs` 1797.0 ms, `keyMs` 843.4 ms e `keyApiMs` 711.8 ms. Era probabilmente il server nello stato lento descritto in [`PERFORMANCE.md`](PERFORMANCE.md) (sezione «Indagine»). I valori di quella misura sono ancora in `benchmarks/results/level-01/page.json`.
+- Un solo computer, una sola sessione registrata, cinque corse misurate, un solo avvio del browser.
+- Il controllo vede lo stato del server solo prima e dopo le sei corse: un passaggio di stato nel mezzo che si risolve prima del secondo controllo non verrebbe notato.
 - Il tempo «a schermo» è un'approssimazione: due frame di disegno dopo che le righe sono nel DOM, non una misura dei tempi di disegno del browser. Include il piccolo ritardo dei comandi di Playwright, non misurato.
 - La finestra è quella predefinita di Playwright e non è stata registrata. Nessuna limitazione di CPU e di rete: tutto su `127.0.0.1`.
 - Una sola ricerca per il tasto (`f`) e una per le richieste (`farina`); altri testi danno numeri diversi.
 - Il numero di richieste è stato misurato scrivendo senza pausa tra i tasti.
-- Le due differenze (`listMs` meno `listApiMs`, `keyMs` meno `keyApiMs`) sono calcolate a mano sui valori grezzi e non escono dallo script.
-- L'ambiente del backend è lo stesso della baseline dell'endpoint: OPcache non caricata, `APP_DEBUG=true` e `curl` di PHP bloccato, con effetto non verificato (vedi [`PERFORMANCE.md`](PERFORMANCE.md)).
+- Le due differenze (`listMs` meno `listApiMs`, `keyMs` meno `keyApiMs`) sono calcolate con un comando che non è nel repository e non escono dallo script.
+- L'ambiente del backend è lo stesso della baseline dell'endpoint: OPcache non caricata e `APP_DEBUG=true`, con effetto non verificato (vedi [`PERFORMANCE.md`](PERFORMANCE.md)).
