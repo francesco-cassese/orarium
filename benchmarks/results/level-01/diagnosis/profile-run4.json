@@ -1,0 +1,102 @@
+{
+    "php": "8.4.27",
+    "opcache": false,
+    "database": "orarium",
+    "rows": 20000,
+    "boot_ms": 131.08,
+    "framework_request_ms": {
+        "median_ms": 0.33,
+        "min_ms": 0.28,
+        "max_ms": 0.41,
+        "peak_mb": 0.02
+    },
+    "scenarios": {
+        "list": {
+            "rows": 20000,
+            "bytes": 1356661,
+            "query_raw": {
+                "median_ms": 28.8,
+                "min_ms": 23.49,
+                "max_ms": 34.15,
+                "peak_mb": 13.43
+            },
+            "query_and_models": {
+                "median_ms": 269.19,
+                "min_ms": 254.91,
+                "max_ms": 293.23,
+                "peak_mb": 31.94
+            },
+            "resources": {
+                "median_ms": 189.12,
+                "min_ms": 187.8,
+                "max_ms": 194.29,
+                "peak_mb": 11.33
+            },
+            "json_encode": {
+                "median_ms": 2.88,
+                "min_ms": 2.73,
+                "max_ms": 3.25,
+                "peak_mb": 1.3
+            },
+            "full_request": {
+                "median_ms": 466.3,
+                "min_ms": 459.96,
+                "max_ms": 508.46,
+                "peak_mb": 41.79
+            }
+        },
+        "search": {
+            "rows": 485,
+            "bytes": 32319,
+            "query_raw": {
+                "median_ms": 6.05,
+                "min_ms": 5.92,
+                "max_ms": 6.45,
+                "peak_mb": 0.36
+            },
+            "query_and_models": {
+                "median_ms": 12.24,
+                "min_ms": 12.05,
+                "max_ms": 21.4,
+                "peak_mb": 0.79
+            },
+            "resources": {
+                "median_ms": 4.61,
+                "min_ms": 4.54,
+                "max_ms": 4.68,
+                "peak_mb": 0.28
+            },
+            "json_encode": {
+                "median_ms": 0.06,
+                "min_ms": 0.06,
+                "max_ms": 0.06,
+                "peak_mb": 0.03
+            },
+            "full_request": {
+                "median_ms": 18.27,
+                "min_ms": 17.97,
+                "max_ms": 19.08,
+                "peak_mb": 1.03
+            }
+        }
+    },
+    "explain_search": [
+        {
+            "id": 1,
+            "select_type": "SIMPLE",
+            "table": "ingredients",
+            "partitions": null,
+            "type": "ALL",
+            "possible_keys": null,
+            "key": null,
+            "key_len": null,
+            "ref": null,
+            "rows": 19588,
+            "filtered": 11.110000610351562,
+            "Extra": "Using where"
+        }
+    ],
+    "explain_analyze_search": [
+        "-> Filter: (ingredients.`name` like '%farina%')  (cost=1983 rows=2176) (actual time=0.0288..4.99 rows=485 loops=1)\n    -> Table scan on ingredients  (cost=1983 rows=19588) (actual time=0.0246..2.81 rows=20000 loops=1)\n"
+    ]
+}
