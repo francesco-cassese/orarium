@@ -233,6 +233,36 @@ La «query con modelli» misurata direttamente è 12.24 ms (11.97–12.44 ms), c
 - Creazione dei modelli e «resto» sono differenze, non misure dirette.
 - Il riepilogo è calcolato dai file JSON con un comando che non è nel repository.
 
+### Dopo la paginazione dell'elenco (issue #83)
+
+L'API restituisce 50 ingredienti per pagina (`page`, `per_page` da 1 a 100), ordinati per `id`, con `data`, `links` e `meta`. La ricerca funziona insieme alla paginazione e i link di pagina mantengono `search` e `per_page`. L'indirizzo `/api/v1/ingredients` senza parametri ora restituisce 50 righe invece di 20.000.
+
+Ambiente, dataset, metodo e regola di validità sono quelli del Level 1: stesso script (`benchmarks/measure.ps1`), 6 giri validi al primo tentativo, health prima e dopo tra 98,4 e 99,2 ms. Risultati in `benchmarks/results/level-01/optimized/`.
+
+| Richiesta | Prima | Dopo |
+|---|---|---|
+| Elenco, mediana | 574,3 ms | 139,1 ms |
+| Elenco, p95 | 608,5 ms | 159,6 ms |
+| Elenco, dati per richiesta | 1.325,1 KB | 5,2 KB |
+| Ricerca "farina", mediana | 141,1 ms | 141,1 ms |
+| Ricerca "farina", p95 | 168,2 ms | 163,5 ms |
+| Ricerca "farina", dati per richiesta | 31,8 KB | 5,1 KB |
+
+Le mediane sono la mediana delle 6 mediane di giro; il costo fisso del server (health) è circa 99 ms.
+
+Misura senza server web (`benchmarks/profile-list.php`, 3 corse, mediane in ms):
+
+| Passo | Elenco | Ricerca |
+|---|---|---|
+| Query di conteggio | 2,12 | 4,74 |
+| Query delle prime 50 righe | 1,99 | 2,78 |
+| Richiesta completa, prima | 475,0 | 18,2 |
+| Richiesta completa, dopo | 5,89 | 8,79 |
+
+Il piano di esecuzione della ricerca è una scansione completa della tabella (`type: ALL`, 19.588 righe stimate): il conteggio della ricerca costa più delle 50 righe.
+
+**Limiti.** La ricerca non cambia nelle misure con k6 (141,1 ms prima e dopo), mentre nella misura senza server web passa da 18,2 a 8,79 ms. Questa differenza non è spiegata. Anche i 139 ms dell'elenco restano sopra la somma del costo fisso (circa 99 ms) e del tempo senza server web (5,89 ms). Il conteggio completo della tabella ad ogni richiesta e la paginazione di tipo `paginate()` (con `meta.total`) sono una scelta dell'API.
+
 ## Indagine: il server di sviluppo a due velocità (issue #77)
 
 Nella baseline del Livello 0 l'endpoint `/api/v1/health` rispondeva con una mediana di circa 98 ms. Nelle sessioni successive la stessa rotta, con lo stesso codice, rispondeva in circa 340 ms. Questa sezione riassume cosa è stato escluso, cosa è stato osservato e quale regola ne segue.
