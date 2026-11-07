@@ -122,3 +122,55 @@ Lettura preliminare, non verificata con un profiler.
 - Il numero di richieste è stato misurato scrivendo senza pausa tra i tasti.
 - Le due differenze (`listMs` meno `listApiMs`, `keyMs` meno `keyApiMs`) sono calcolate con un comando che non è nel repository e non escono dallo script.
 - L'ambiente del backend è lo stesso della baseline dell'endpoint: OPcache non caricata e `APP_DEBUG=true`, con effetto non verificato (vedi [`PERFORMANCE.md`](PERFORMANCE.md)).
+
+## Livello 1: pagina dell'elenco con il paginatore
+
+Misura della pagina dell'elenco con il paginatore: l'API restituisce una pagina alla volta (50 righe), e la lista mostra la pagina corrente con i pulsanti Indietro e Avanti. Le sezioni di questa baseline restano intatte: il confronto è con la sezione «Livello 1: pagina dell'elenco degli ingredienti (versione semplice)».
+
+### Ambiente
+
+- Data della serie: 2026-11-07, intorno alle 16:19 (ora italiana; nel file `page.json` è `2026-11-07T15:19:34.789Z`).
+- Computer, database e metodo: gli stessi della baseline di questo livello. Build di produzione (`pnpm build`), servita con `pnpm preview` su `127.0.0.1:4173`. Browser e Node registrati in `page.json`: Chromium 156.0.8078.4, Node v24.16.0.
+- Condizioni di misura: la baseline dichiarava il portatile collegato alla corrente e non registrava i programmi aperti. Per questa serie né l'alimentazione né i programmi aperti sono stati registrati, e la dichiarazione di chi ha misurato su questi due punti non è ancora nel documento.
+- Codice misurato: frontend alla commit `0f57af9` del branch `feat/85-add-ingredient-pager`; backend `main` alla commit `8921850` (PR #84), da cui parte il branch (`git merge-base main HEAD`). Lo script `benchmarks/page.mjs` aveva una modifica non ancora committata al momento della serie; il contenuto è poi stato committato in `88716ef`.
+- Cosa è cambiato nel metodo: solo il modo in cui lo script riconosce le richieste. Ora le trova per percorso e parametri dell'indirizzo (con `new URL`), non per come finisce la stringa. Le grandezze misurate sono le stesse.
+
+### Risultati
+
+Misure a confronto. La colonna «Con paginatore» riporta la mediana delle cinque corse misurate, la colonna min–max il minimo e il massimo della stessa serie.
+
+| Misura | Baseline | Con paginatore | Min–max con paginatore |
+|---|---|---|---|
+| Lista a schermo (`listMs`) | 1142.6 ms | 238.5 ms | 226.3–245.2 ms |
+| di cui richiesta dell'elenco (`listApiMs`) | 598.7 ms | 154.6 ms | 141.5–158.7 ms |
+| Dopo un tasto (`keyMs`) | 391.7 ms | 191.1 ms | 176.8–213.3 ms |
+| di cui richiesta della ricerca (`keyApiMs`) | 242.2 ms | 145.0 ms | 141.4–161.0 ms |
+| Nodi DOM | 80023 | 226 | 226–226 |
+| Righe della tabella | 20000 | 50 | 50–50 |
+| Righe dopo il tasto `f` | 3983 | 50 | 50–50 |
+| Richieste scrivendo `farina` | 6 | 6 | 6–6 |
+
+- Controllo: `/api/v1/health` 99.3 ms prima e 98.5 ms dopo (mediane di k6, contro 98.1 e 98.4 ms della baseline).
+- Bundle di produzione: 21 moduli; JavaScript 221.93 kB (69.51 kB gzip); CSS e HTML invariati (140.73 kB e 0.45 kB). La baseline aveva 20 moduli e 221.32 kB (69.31 kB gzip).
+
+### Lettura
+
+Solo fatti e confronti tra misure.
+
+- Il tempo dopo l'arrivo dei dati (`listMs` meno `listApiMs`, corse 2–6) ha mediana 84.8 ms (min–max 81.3–86.5 ms), contro 541.2 ms nella baseline.
+- Per il tasto, il tempo dopo la risposta (`keyMs` meno `keyApiMs`, corse 2–6) ha mediana 35.4 ms (min–max 34.3–53.9 ms), contro 139.6 ms nella baseline.
+- La richiesta dell'elenco pesa ora circa il 65% del tempo a schermo (rapporto tra due mediane: 154.6 su 238.5 ms).
+- Le richieste scrivendo `farina` sono rimaste 6: la pagina non ha cambiato come si comporta mentre si scrive.
+
+### Limiti e osservazioni
+
+- Il confronto non è fra lo stesso lavoro: 20.000 righe nella baseline, 50 con il paginatore.
+- Il miglioramento vale per #83 e #85 insieme e non si può dividere.
+- Una sola sessione, un solo computer.
+- Valgono anche qui gli altri limiti della sezione precedente (stesso metodo).
+- Le due differenze (`listMs` meno `listApiMs`, `keyMs` meno `keyApiMs`) sono calcolate fuori dal repository.
+
+### File
+
+- `benchmarks/results/level-01/pager/page.json`: valori grezzi di tutte le corse e riepilogo.
+- `benchmarks/results/level-01/pager/page-health-before.json` e `page-health-after.json`: i due controlli su `/api/v1/health`, nella stessa cartella.
