@@ -12,7 +12,9 @@ function Pagination({ currentPage, lastPage }) {
       <button type="button" disabled={currentPage === 1}>
         Indietro
       </button>
-      <button type="button">Avanti</button>
+      <button type="button" disabled={currentPage === lastPage}>
+        Avanti
+      </button>
     </>
   )
 }

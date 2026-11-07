@@ -123,3 +123,17 @@ it('disables Indietro on the first page', async () => {
   expect(screen.getByRole('button', { name: 'Indietro' })).toBeDisabled()
   expect(screen.getByRole('button', { name: 'Avanti' })).toBeEnabled()
 })
+
+// All'ultima pagina non si può andare avanti.
+it('disables Avanti on the last page', async () => {
+  fetch.mockReturnValue(
+    respondWith(ingredients, { current_page: 3, last_page: 3 }),
+  )
+
+  render(<IngredientList />)
+
+  await screen.findByText('Pagina 3 di 3')
+
+  expect(screen.getByRole('button', { name: 'Indietro' })).toBeEnabled()
+  expect(screen.getByRole('button', { name: 'Avanti' })).toBeDisabled()
+})
