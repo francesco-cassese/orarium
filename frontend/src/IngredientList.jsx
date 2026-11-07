@@ -2,11 +2,14 @@ import { useState, useEffect } from 'react'
 import fetchIngredients from './api/ingredients.js'
 import formatPrice from './utils/formatPrice.js'
 import formatUnit from './utils/formatUnit.js'
+import Pagination from './Pagination.jsx'
 
 function IngredientList() {
   const [search, setSearch] = useState('')
   const [ingredients, setIngredients] = useState([])
+  const [meta, setMeta] = useState({ current_page: 1, last_page: 1 })
   const [status, setStatus] = useState('loading')
+  const [page, setPage] = useState(1)
 
   useEffect(() => {
     let ignore = false
@@ -14,9 +17,10 @@ function IngredientList() {
     async function load() {
       setStatus('loading')
       try {
-        const data = await fetchIngredients(search)
+        const { data, meta: pageMeta } = await fetchIngredients(search, page)
         if (!ignore) {
           setIngredients(data)
+          setMeta(pageMeta)
           setStatus('ready')
         }
       } catch {
@@ -29,7 +33,7 @@ function IngredientList() {
     return () => {
       ignore = true
     }
-  }, [search])
+  }, [search, page])
 
   return (
     <>
@@ -39,7 +43,10 @@ function IngredientList() {
         id="search"
         className="form-control"
         value={search}
-        onChange={(e) => setSearch(e.target.value)}
+        onChange={(e) => {
+          setSearch(e.target.value)
+          setPage(1)
+        }}
       />
 
       {status === 'loading' && (
@@ -55,24 +62,31 @@ function IngredientList() {
       )}
 
       {status === 'ready' && (
-        <table className="table">
-          <thead>
-            <tr>
-              <th>Nome</th>
-              <th>Unità</th>
-              <th>Prezzo</th>
-            </tr>
-          </thead>
-          <tbody>
-            {ingredients.map((ingredient) => (
-              <tr key={ingredient.id}>
-                <td>{ingredient.name}</td>
-                <td>{formatUnit(ingredient.unit)}</td>
-                <td>{formatPrice(ingredient.price_cents)}</td>
+        <>
+          <table className="table">
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Unità</th>
+                <th>Prezzo</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {ingredients.map((ingredient) => (
+                <tr key={ingredient.id}>
+                  <td>{ingredient.name}</td>
+                  <td>{formatUnit(ingredient.unit)}</td>
+                  <td>{formatPrice(ingredient.price_cents)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <Pagination
+            currentPage={meta.current_page}
+            lastPage={meta.last_page}
+            onPageChange={setPage}
+          />
+        </>
       )}
     </>
   )

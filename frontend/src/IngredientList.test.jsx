@@ -8,9 +8,12 @@ const ingredients = [
   { id: 2, name: 'burro fresco', unit: 'kg', price_cents: 950 },
 ]
 
-// Risposta simulata dell'API, nella stessa forma del backend: { data: [...] }.
-function respondWith(data) {
-  return Promise.resolve({ ok: true, json: () => Promise.resolve({ data }) })
+// Risposta simulata dell'API, nella stessa forma del backend: { data: [...], meta: { ... } }.
+function respondWith(data, meta = { current_page: 1, last_page: 1 }) {
+  return Promise.resolve({
+    ok: true,
+    json: () => Promise.resolve({ data, meta }),
+  })
 }
 
 beforeEach(() => {
@@ -81,6 +84,124 @@ it('asks the API with the search text', async () => {
   )
 
   expect(fetch).toHaveBeenLastCalledWith(
-    'http://api.test/api/v1/ingredients?search=farina%2000',
+    'http://api.test/api/v1/ingredients?search=farina+00&page=1',
   )
+})
+
+// All'apertura la lista chiede la prima pagina.
+it('asks for the first page', () => {
+  fetch.mockReturnValue(respondWith(ingredients))
+
+  render(<IngredientList />)
+
+  expect(fetch).toHaveBeenCalledWith(
+    'http://api.test/api/v1/ingredients?page=1',
+  )
+})
+
+// Il paginatore dice a che pagina sei e quante ce ne sono.
+it('shows the current page and the last page', async () => {
+  fetch.mockReturnValue(
+    respondWith(ingredients, { current_page: 1, last_page: 3 }),
+  )
+
+  render(<IngredientList />)
+
+  await screen.findByText('Pagina 1 di 3')
+})
+
+// Alla prima pagina non si può tornare indietro, ma si può andare avanti.
+it('disables Indietro on the first page', async () => {
+  fetch.mockReturnValue(
+    respondWith(ingredients, { current_page: 1, last_page: 3 }),
+  )
+
+  render(<IngredientList />)
+
+  await screen.findByText('Pagina 1 di 3')
+
+  expect(screen.getByRole('button', { name: 'Indietro' })).toBeDisabled()
+  expect(screen.getByRole('button', { name: 'Avanti' })).toBeEnabled()
+})
+
+// All'ultima pagina non si può andare avanti.
+it('disables Avanti on the last page', async () => {
+  fetch.mockReturnValue(
+    respondWith(ingredients, { current_page: 3, last_page: 3 }),
+  )
+
+  render(<IngredientList />)
+
+  await screen.findByText('Pagina 3 di 3')
+
+  expect(screen.getByRole('button', { name: 'Indietro' })).toBeEnabled()
+  expect(screen.getByRole('button', { name: 'Avanti' })).toBeDisabled()
+})
+
+// Il clic su Avanti chiede la pagina successiva.
+it('asks for the next page when Avanti is clicked', async () => {
+  fetch.mockReturnValue(
+    respondWith(ingredients, { current_page: 1, last_page: 3 }),
+  )
+
+  render(<IngredientList />)
+
+  await screen.findByText('Pagina 1 di 3')
+
+  const utente = userEvent.setup()
+
+  await utente.click(screen.getByRole('button', { name: 'Avanti' }))
+
+  expect(fetch).toHaveBeenLastCalledWith(
+    'http://api.test/api/v1/ingredients?page=2',
+  )
+})
+
+// Cambiare il testo cercato riporta alla prima pagina.
+it('goes back to the first page when the search text changes', async () => {
+  fetch.mockReturnValue(
+    respondWith(ingredients, { current_page: 1, last_page: 3 }),
+  )
+
+  render(<IngredientList />)
+
+  await screen.findByText('Pagina 1 di 3')
+
+  const utente = userEvent.setup()
+
+  await utente.click(screen.getByRole('button', { name: 'Avanti' }))
+
+  await utente.type(screen.getByLabelText('Cerca'), 'farina')
+
+  expect(fetch).toHaveBeenLastCalledWith(
+    'http://api.test/api/v1/ingredients?search=farina&page=1',
+  )
+})
+
+// Il clic su Indietro chiede la pagina precedente.
+it('asks for the previous page when Indietro is clicked', async () => {
+  fetch
+    .mockReturnValueOnce(
+      respondWith(ingredients, { current_page: 1, last_page: 3 }),
+    )
+    .mockReturnValue(
+      respondWith(ingredients, { current_page: 2, last_page: 3 }),
+    )
+
+  render(<IngredientList />)
+
+  await screen.findByText('Pagina 1 di 3')
+
+  const utente = userEvent.setup()
+
+  await utente.click(screen.getByRole('button', { name: 'Avanti' }))
+
+  await screen.findByText('Pagina 2 di 3')
+
+  await utente.click(screen.getByRole('button', { name: 'Indietro' }))
+
+  expect(fetch).toHaveBeenLastCalledWith(
+    'http://api.test/api/v1/ingredients?page=1',
+  )
+  expect(fetch).toHaveBeenCalledTimes(3)
 })

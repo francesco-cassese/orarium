@@ -59,12 +59,15 @@ async function measureRun(browser) {
   const rows = await page.evaluate(
     () => document.querySelectorAll('tbody tr').length,
   )
-  const listApiMs = await page.evaluate(
-    () =>
-      performance
-        .getEntriesByType('resource')
-        .find((entry) => entry.name.endsWith('/ingredients')).duration,
-  )
+  const listApiMs = await page.evaluate(() => {
+    const entry = performance.getEntriesByType('resource').find((e) => {
+      const url = new URL(e.name)
+      return (
+        url.pathname.endsWith('/ingredients') && !url.searchParams.has('search')
+      )
+    })
+    return entry.duration
+  })
 
   // 2. Tempo dopo un tasto (f) nel campo di ricerca, con la lista già a schermo.
   await page.locator('#search').focus()
@@ -80,12 +83,13 @@ async function measureRun(browser) {
   await waitForList(page)
   await nextPaint(page)
   const keyMs = performance.now() - t1
-  const keyApiMs = await page.evaluate(
-    () =>
-      performance
-        .getEntriesByType('resource')
-        .find((entry) => entry.name.endsWith('search=f')).duration,
-  )
+  const keyApiMs = await page.evaluate(() => {
+    const entry = performance.getEntriesByType('resource').find((e) => {
+      const url = new URL(e.name)
+      return url.searchParams.get('search') === 'f'
+    })
+    return entry.duration
+  })
   const keyRows = await page.evaluate(
     () => document.querySelectorAll('tbody tr').length,
   )
