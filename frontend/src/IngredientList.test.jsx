@@ -156,3 +156,24 @@ it('asks for the next page when Avanti is clicked', async () => {
     'http://api.test/api/v1/ingredients?page=2',
   )
 })
+
+// Cambiare il testo cercato riporta alla prima pagina.
+it('goes back to the first page when the search text changes', async () => {
+  fetch.mockReturnValue(
+    respondWith(ingredients, { current_page: 1, last_page: 3 }),
+  )
+
+  render(<IngredientList />)
+
+  await screen.findByText('Pagina 1 di 3')
+
+  const utente = userEvent.setup()
+
+  await utente.click(screen.getByRole('button', { name: 'Avanti' }))
+
+  await utente.type(screen.getByLabelText('Cerca'), 'farina')
+
+  expect(fetch).toHaveBeenLastCalledWith(
+    'http://api.test/api/v1/ingredients?search=farina&page=1',
+  )
+})

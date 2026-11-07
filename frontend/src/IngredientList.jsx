@@ -43,7 +43,10 @@ function IngredientList() {
         id="search"
         className="form-control"
         value={search}
-        onChange={(e) => setSearch(e.target.value)}
+        onChange={(e) => {
+          setSearch(e.target.value)
+          setPage(1)
+        }}
       />
 
       {status === 'loading' && (
