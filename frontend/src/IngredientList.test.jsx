@@ -109,3 +109,17 @@ it('shows the current page and the last page', async () => {
 
   await screen.findByText('Pagina 1 di 3')
 })
+
+// Alla prima pagina non si può tornare indietro, ma si può andare avanti.
+it('disables Indietro on the first page', async () => {
+  fetch.mockReturnValue(
+    respondWith(ingredients, { current_page: 1, last_page: 3 }),
+  )
+
+  render(<IngredientList />)
+
+  await screen.findByText('Pagina 1 di 3')
+
+  expect(screen.getByRole('button', { name: 'Indietro' })).toBeDisabled()
+  expect(screen.getByRole('button', { name: 'Avanti' })).toBeEnabled()
+})

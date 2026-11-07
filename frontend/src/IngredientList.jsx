@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import fetchIngredients from './api/ingredients.js'
 import formatPrice from './utils/formatPrice.js'
 import formatUnit from './utils/formatUnit.js'
+import Pagination from './Pagination.jsx'
 
 function IngredientList() {
   const [search, setSearch] = useState('')
@@ -76,9 +77,10 @@ function IngredientList() {
               ))}
             </tbody>
           </table>
-          <p>
-            Pagina {meta.current_page} di {meta.last_page}
-          </p>
+          <Pagination
+            currentPage={meta.current_page}
+            lastPage={meta.last_page}
+          />
         </>
       )}
     </>
