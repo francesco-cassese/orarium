@@ -9,6 +9,7 @@ function IngredientList() {
   const [ingredients, setIngredients] = useState([])
   const [meta, setMeta] = useState({ current_page: 1, last_page: 1 })
   const [status, setStatus] = useState('loading')
+  const [page, setPage] = useState(1)
 
   useEffect(() => {
     let ignore = false
@@ -16,7 +17,7 @@ function IngredientList() {
     async function load() {
       setStatus('loading')
       try {
-        const { data, meta: pageMeta } = await fetchIngredients(search)
+        const { data, meta: pageMeta } = await fetchIngredients(search, page)
         if (!ignore) {
           setIngredients(data)
           setMeta(pageMeta)
@@ -32,7 +33,7 @@ function IngredientList() {
     return () => {
       ignore = true
     }
-  }, [search])
+  }, [search, page])
 
   return (
     <>
@@ -80,6 +81,7 @@ function IngredientList() {
           <Pagination
             currentPage={meta.current_page}
             lastPage={meta.last_page}
+            onPageChange={setPage}
           />
         </>
       )}

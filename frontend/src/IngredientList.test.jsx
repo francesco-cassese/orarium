@@ -137,3 +137,22 @@ it('disables Avanti on the last page', async () => {
   expect(screen.getByRole('button', { name: 'Indietro' })).toBeEnabled()
   expect(screen.getByRole('button', { name: 'Avanti' })).toBeDisabled()
 })
+
+// Il clic su Avanti chiede la pagina successiva.
+it('asks for the next page when Avanti is clicked', async () => {
+  fetch.mockReturnValue(
+    respondWith(ingredients, { current_page: 1, last_page: 3 }),
+  )
+
+  render(<IngredientList />)
+
+  await screen.findByText('Pagina 1 di 3')
+
+  const utente = userEvent.setup()
+
+  await utente.click(screen.getByRole('button', { name: 'Avanti' }))
+
+  expect(fetch).toHaveBeenLastCalledWith(
+    'http://api.test/api/v1/ingredients?page=2',
+  )
+})
