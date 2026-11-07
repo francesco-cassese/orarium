@@ -177,3 +177,31 @@ it('goes back to the first page when the search text changes', async () => {
     'http://api.test/api/v1/ingredients?search=farina&page=1',
   )
 })
+
+// Il clic su Indietro chiede la pagina precedente.
+it('asks for the previous page when Indietro is clicked', async () => {
+  fetch
+    .mockReturnValueOnce(
+      respondWith(ingredients, { current_page: 1, last_page: 3 }),
+    )
+    .mockReturnValue(
+      respondWith(ingredients, { current_page: 2, last_page: 3 }),
+    )
+
+  render(<IngredientList />)
+
+  await screen.findByText('Pagina 1 di 3')
+
+  const utente = userEvent.setup()
+
+  await utente.click(screen.getByRole('button', { name: 'Avanti' }))
+
+  await screen.findByText('Pagina 2 di 3')
+
+  await utente.click(screen.getByRole('button', { name: 'Indietro' }))
+
+  expect(fetch).toHaveBeenLastCalledWith(
+    'http://api.test/api/v1/ingredients?page=1',
+  )
+  expect(fetch).toHaveBeenCalledTimes(3)
+})
