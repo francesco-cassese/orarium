@@ -6,6 +6,7 @@ import formatUnit from './utils/formatUnit.js'
 function IngredientList() {
   const [search, setSearch] = useState('')
   const [ingredients, setIngredients] = useState([])
+  const [meta, setMeta] = useState({ current_page: 1, last_page: 1 })
   const [status, setStatus] = useState('loading')
 
   useEffect(() => {
@@ -14,9 +15,10 @@ function IngredientList() {
     async function load() {
       setStatus('loading')
       try {
-        const data = await fetchIngredients(search)
+        const { data, meta: pageMeta } = await fetchIngredients(search)
         if (!ignore) {
           setIngredients(data)
+          setMeta(pageMeta)
           setStatus('ready')
         }
       } catch {
@@ -55,24 +57,29 @@ function IngredientList() {
       )}
 
       {status === 'ready' && (
-        <table className="table">
-          <thead>
-            <tr>
-              <th>Nome</th>
-              <th>Unità</th>
-              <th>Prezzo</th>
-            </tr>
-          </thead>
-          <tbody>
-            {ingredients.map((ingredient) => (
-              <tr key={ingredient.id}>
-                <td>{ingredient.name}</td>
-                <td>{formatUnit(ingredient.unit)}</td>
-                <td>{formatPrice(ingredient.price_cents)}</td>
+        <>
+          <table className="table">
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Unità</th>
+                <th>Prezzo</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {ingredients.map((ingredient) => (
+                <tr key={ingredient.id}>
+                  <td>{ingredient.name}</td>
+                  <td>{formatUnit(ingredient.unit)}</td>
+                  <td>{formatPrice(ingredient.price_cents)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <p>
+            Pagina {meta.current_page} di {meta.last_page}
+          </p>
+        </>
       )}
     </>
   )

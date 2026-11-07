@@ -89,7 +89,7 @@ it('asks the API with the search text', async () => {
 })
 
 // All'apertura la lista chiede la prima pagina.
-it('asks for the first page', function () {
+it('asks for the first page', () => {
   fetch.mockReturnValue(respondWith(ingredients))
 
   render(<IngredientList />)
@@ -97,4 +97,15 @@ it('asks for the first page', function () {
   expect(fetch).toHaveBeenCalledWith(
     'http://api.test/api/v1/ingredients?page=1',
   )
+})
+
+// Il paginatore dice a che pagina sei e quante ce ne sono.
+it('shows the current page and the last page', async () => {
+  fetch.mockReturnValue(
+    respondWith(ingredients, { current_page: 1, last_page: 3 }),
+  )
+
+  render(<IngredientList />)
+
+  await screen.findByText('Pagina 1 di 3')
 })
