@@ -100,7 +100,7 @@ Dalla radice:
 - `docker compose ps`: mostra lo stato dei servizi.
 - `docker compose down`: ferma i servizi. I dati restano.
 - `docker compose down -v`: ferma i servizi **e cancella anche i dati del database**. Usalo solo per ripartire da zero.
-- `docker volume ls`: elenca i volumi di Docker. I dati del database e di Redis stanno nei volumi `mysql_data` e `redis_data` del `compose.yaml`, che sul computer compaiono con un nome che li contiene.
+- `docker volume ls`: elenca i volumi di Docker. I dati del database e di Redis stanno nei volumi `mysql_data` e `redis_data` del `compose.yaml`. Sul computer si chiamano `orarium_mysql_data` e `orarium_redis_data`: Compose mette davanti il nome del progetto, che di default è il nome della cartella (`docker compose ls` mostra i progetti).
 - Non lanciare `docker volume prune --all`: cancella **tutti** i volumi con nome che nessun contenitore usa, non solo quelli di Orarium. Senza `--all` toccherebbe solo i volumi anonimi.
 
 Dalla cartella `backend/`:
