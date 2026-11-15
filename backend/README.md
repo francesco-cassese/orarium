@@ -97,7 +97,8 @@ Per provarlo, con `php artisan serve` avviato, apri [http://localhost:8000/api/v
 ## Comandi utili
 
 Dalla radice:
-- `docker compose ps`: mostra lo stato dei servizi.
+- `docker compose ps`: mostra lo stato dei servizi. `db` e `redis` hanno un controllo di salute, e `ps` lo mostra accanto a `Up`. Ci sono tre stati: `starting` si vede subito dopo l'avvio, finché il controllo non è passato; `healthy` vuol dire che il controllo è passato; `unhealthy` vuol dire che 10 controlli sono falliti di fila (`retries: 10` e un controllo ogni 10 secondi, uguali per `db` e `redis`).
+- `docker inspect --format "{{json .State.Health}}" orarium-db-1` (se la cartella del progetto ha un altro nome, il prefisso cambia: i nomi si vedono con `docker compose ps`): mostra gli ultimi controlli di salute di `db` (fino a 5 voci), ciascuno con `ExitCode` e `Output`. Attenzione: `docker inspect` senza `--format` mostra anche le variabili d'ambiente del contenitore (campo `Config.Env`), e `docker compose config` mostra i valori già sostituiti: nel caso di Orarium ci sono le password.
 - `docker compose down`: ferma i servizi. I dati restano.
 - `docker compose down -v`: ferma i servizi **e cancella anche i dati del database**. Usalo solo per ripartire da zero.
 - `docker volume ls`: elenca i volumi di Docker. I dati del database e di Redis stanno nei volumi `mysql_data` e `redis_data` del `compose.yaml`. Sul computer si chiamano `orarium_mysql_data` e `orarium_redis_data`: Compose mette davanti il nome del progetto, che di default è il nome della cartella (`docker compose ls` mostra i progetti).
