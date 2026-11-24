@@ -174,3 +174,61 @@ Solo fatti e confronti tra misure.
 
 - `benchmarks/results/level-01/pager/page.json`: valori grezzi di tutte le corse e riepilogo.
 - `benchmarks/results/level-01/pager/page-health-before.json` e `page-health-after.json`: i due controlli su `/api/v1/health`.
+
+## Livello 1: ricerca con attesa prima della richiesta (issue #92)
+
+La ricerca aspetta 300 ms dall'ultimo tasto prima di chiedere l'API. Il testo nel campo cambia subito; la richiesta parte solo quando il testo è fermo per 300 ms, e in quel momento la pagina torna alla prima. Il confronto è con `main`, che ha già il paginatore della sezione precedente.
+
+### Ambiente
+
+- Data: serie «prima» del 2026-11-24 alle 17:47 (ora italiana; in `page.json` è `16:47` UTC). Serie «dopo» intorno alle 18:42 (ora italiana; in `page.json` è `17:42` UTC).
+- Computer, database e metodo: gli stessi del Livello 1 del paginatore, sopra. Build di produzione (`pnpm build`), servita con `pnpm preview` su `127.0.0.1:4173`. Browser e Node registrati in `page.json`: Chromium 156.0.8078.4, Node v24.16.0.
+- Condizioni di misura, dichiarate da chi ha misurato e non verificate con uno strumento: durante la serie erano aperti Docker Desktop (con il database), due finestre di VS Code e un terminale.
+- Codice misurato: frontend, `main` alla commit `720ac5c` contro il branch `perf/92-debounce-ingredient-search` alla commit `89f1acd`.
+- Bundle di produzione del branch (serie «dopo»), dichiarato da chi ha misurato e non verificato in questa sezione: 21 moduli; JavaScript 222.05 kB (69.56 kB gzip); CSS 140.73 kB (20.14 kB gzip); HTML 0.45 kB (0.29 kB gzip). Il bundle del «prima» (`main`, `720ac5c`) non è stato rimisurato: l'unico riferimento è la serie del paginatore, con JavaScript 221.93 kB (69.51 kB gzip). Il confronto è quindi +0.12 kB di JavaScript tra due build diverse, non tra prima e dopo della stessa.
+
+### Metodo
+
+- Sei corse per serie, la corsa 1 scartata come riscaldamento: restano le corse 2–6. Mediane e min–max sono calcolati su quelle cinque corse. Script: `benchmarks/page.mjs`, con Playwright.
+- Misure per corsa:
+  - `listMs`: dalla navigazione alla lista a schermo, dopo due frame di disegno con le righe già nel DOM; `listApiMs`: durata della richiesta dell'elenco senza ricerca.
+  - `keyMs`: dal tasto `f` nel campo di ricerca, con la lista già a schermo, fino alla risposta della richiesta con `search=f`, poi lista pronta e due frame; `keyApiMs`: durata della richiesta con `search=f`.
+  - Richieste: numero di richieste all'API mentre si digita «farina» in una scheda nuova dello stesso contesto del browser.
+- Controllo `health`: `/api/v1/health` misurato con k6 prima e dopo ogni serie, con `benchmarks/measure-page.ps1`. Il valore è la mediana di `http_req_duration` della corsa; lo script la arrotonda a un decimale. Una serie vale solo se i due controlli stanno sotto 150 ms. In entrambe le serie i controlli erano sotto la soglia.
+
+### Risultati
+
+Cinque corse misurate per serie.
+
+| Misura | Prima | Min–max prima | Dopo | Min–max dopo |
+|---|---|---|---|---|
+| Richieste scrivendo «farina», per corsa | 6 | 6–6 | 1 | 1–1 |
+| Elenco, `listMs` (mediana) | 128.3 ms | 118.4–140.3 ms | 134.7 ms | 127.0–151.0 ms |
+| Elenco, `listApiMs` (mediana) | 38.1 ms | 36.2–42.0 ms | 36.7 ms | 33.6–48.7 ms |
+| Tasto `f`, `keyMs` (mediana) | 78.8 ms | 76.6–91.3 ms | 392.9 ms | 359.3–407.8 ms |
+| Tasto `f`, `keyApiMs` (mediana) | 38.8 ms | 37.3–51.8 ms | 53.5 ms | 29.2–57.7 ms |
+
+- Controllo `health`, mediana di k6 nei file (a due decimali): serie «prima» 7.63 ms prima e 7.62 ms dopo; serie «dopo» 7.62 ms prima e 7.64 ms dopo.
+
+### Lettura
+
+Solo fatti.
+
+- Le richieste scrivendo «farina» passano da 6 a 1, in tutte le sei corse (la prima scartata inclusa).
+- `keyMs` sale da 78.8 a 392.9 ms, cioè circa 314 ms in più, coerenti con i 300 ms di attesa.
+- `listMs`, `listApiMs` e `keyApiMs` hanno intervalli sovrapposti tra «prima» e «dopo» (vedi la colonna «Min–max prima»): la differenza tra le mediane non si interpreta. `keyMs` non si sovrappone: 76.6–91.3 ms prima contro 359.3–407.8 ms dopo. La differenza è coerente con i 300 ms di attesa.
+- Il controllo `health` sta intorno a 7.6 ms in entrambe le serie.
+
+### Limiti e osservazioni
+
+- Il 300 ms è una scelta, non un risultato: la misura digita senza pause e non può dire quale ritardo sia migliore.
+- La misura dice quante richieste partono, non quanto lavoro costano al server: il risparmio sul server non è misurato.
+- Il costo per chi scrive è dichiarato: dopo l'ultimo tasto la lista arriva circa 314 ms dopo.
+- Il tempo «a schermo» è un'approssimazione, come nella sezione del paginatore.
+- I tempi di oggi non sono confrontabili con le serie del Livello 1 di `PERFORMANCE.md` (6 novembre) e del paginatore (7 novembre): `health` è circa 7.6 ms oggi, contro circa 98–99 ms in quelle serie. Non è stato indagato il perché.
+- Tre limiti ereditati: una sola sessione, un solo computer e un solo testo di ricerca.
+
+### File
+
+- `benchmarks/results/level-01/debounce/before/page.json` e `after/page.json`: valori grezzi di tutte le corse e riepilogo.
+- `benchmarks/results/level-01/debounce/before/` e `after/`, file `page-health-before.json` e `page-health-after.json`: i quattro controlli `health`.
