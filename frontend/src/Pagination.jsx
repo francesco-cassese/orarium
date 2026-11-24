@@ -21,7 +21,7 @@ function Pagination({ currentPage, lastPage, onPageChange }) {
       </button>
       <button
         type="button"
-        disabled={currentPage === lastPage}
+        disabled={currentPage >= lastPage}
         onClick={() => onPageChange(currentPage + 1)}
       >
         Avanti
