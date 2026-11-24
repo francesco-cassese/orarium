@@ -10,6 +10,17 @@ function IngredientList() {
   const [meta, setMeta] = useState({ current_page: 1, last_page: 1 })
   const [status, setStatus] = useState('loading')
   const [page, setPage] = useState(1)
+  const [debouncedSearch, setDebouncedSearch] = useState('')
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (search !== debouncedSearch) {
+        setDebouncedSearch(search)
+        setPage(1)
+      }
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [search, debouncedSearch])
 
   useEffect(() => {
     let ignore = false
@@ -17,7 +28,10 @@ function IngredientList() {
     async function load() {
       setStatus('loading')
       try {
-        const { data, meta: pageMeta } = await fetchIngredients(search, page)
+        const { data, meta: pageMeta } = await fetchIngredients(
+          debouncedSearch,
+          page,
+        )
         if (!ignore) {
           setIngredients(data)
           setMeta(pageMeta)
@@ -33,7 +47,7 @@ function IngredientList() {
     return () => {
       ignore = true
     }
-  }, [search, page])
+  }, [debouncedSearch, page])
 
   return (
     <>
@@ -43,10 +57,7 @@ function IngredientList() {
         id="search"
         className="form-control"
         value={search}
-        onChange={(e) => {
-          setSearch(e.target.value)
-          setPage(1)
-        }}
+        onChange={(e) => setSearch(e.target.value)}
       />
 
       {status === 'loading' && (

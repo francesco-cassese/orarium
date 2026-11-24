@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import IngredientList from './IngredientList'
@@ -24,6 +24,7 @@ beforeEach(() => {
 afterEach(() => {
   vi.unstubAllEnvs()
   vi.unstubAllGlobals()
+  vi.useRealTimers()
 })
 
 // La pagina mostra ogni ingrediente in una riga della tabella.
@@ -83,9 +84,11 @@ it('asks the API with the search text', async () => {
     'farina 00',
   )
 
-  expect(fetch).toHaveBeenLastCalledWith(
-    'http://api.test/api/v1/ingredients?search=farina+00&page=1',
-  )
+  await waitFor(() => {
+    expect(fetch).toHaveBeenLastCalledWith(
+      'http://api.test/api/v1/ingredients?search=farina+00&page=1',
+    )
+  })
 })
 
 // All'apertura la lista chiede la prima pagina.
@@ -173,9 +176,11 @@ it('goes back to the first page when the search text changes', async () => {
 
   await utente.type(screen.getByLabelText('Cerca'), 'farina')
 
-  expect(fetch).toHaveBeenLastCalledWith(
-    'http://api.test/api/v1/ingredients?search=farina&page=1',
-  )
+  await waitFor(() => {
+    expect(fetch).toHaveBeenLastCalledWith(
+      'http://api.test/api/v1/ingredients?search=farina&page=1',
+    )
+  })
 })
 
 // Il clic su Indietro chiede la pagina precedente.
@@ -204,4 +209,127 @@ it('asks for the previous page when Indietro is clicked', async () => {
     'http://api.test/api/v1/ingredients?page=1',
   )
   expect(fetch).toHaveBeenCalledTimes(3)
+})
+
+// Digitando «far» senza pause, la pagina non chiede ancora nulla con search=: aspetta che l'utente smetta.
+it('does not ask the API with the search text while the user is still typing', () => {
+  vi.useFakeTimers()
+  fetch.mockReturnValue(respondWith([]))
+
+  render(<IngredientList />)
+  const campo = screen.getByRole('searchbox', { name: 'Cerca' })
+
+  fireEvent.change(campo, { target: { value: 'f' } })
+  act(() => {
+    vi.advanceTimersByTime(100)
+  })
+  fireEvent.change(campo, { target: { value: 'fa' } })
+  act(() => {
+    vi.advanceTimersByTime(100)
+  })
+  fireEvent.change(campo, { target: { value: 'far' } })
+  act(() => {
+    vi.advanceTimersByTime(100)
+  })
+
+  expect(fetch).not.toHaveBeenCalledWith(expect.stringContaining('search='))
+})
+
+// Dopo la pausa c'è una sola richiesta con «far», e in tutto fetch è chiamato due volte: all'apertura e per la ricerca.
+// Attesa di 300 ms dall'ultima modifica: più lunga della pausa di 100 ms tra una modifica e l'altra, più corta di un'attesa che sembri lenta.
+it('asks the API once for the final search text', () => {
+  vi.useFakeTimers()
+  fetch.mockReturnValue(respondWith([]))
+
+  render(<IngredientList />)
+  const campo = screen.getByRole('searchbox', { name: 'Cerca' })
+
+  fireEvent.change(campo, { target: { value: 'f' } })
+  act(() => {
+    vi.advanceTimersByTime(100)
+  })
+  fireEvent.change(campo, { target: { value: 'fa' } })
+  act(() => {
+    vi.advanceTimersByTime(100)
+  })
+  fireEvent.change(campo, { target: { value: 'far' } })
+
+  act(() => {
+    vi.advanceTimersByTime(299)
+  })
+  expect(fetch).not.toHaveBeenCalledWith(expect.stringContaining('search='))
+
+  act(() => {
+    vi.advanceTimersByTime(1)
+  })
+  expect(
+    fetch.mock.calls.filter(
+      ([url]) => url === 'http://api.test/api/v1/ingredients?search=far&page=1',
+    ),
+  ).toHaveLength(1)
+  expect(fetch).toHaveBeenCalledTimes(2)
+})
+
+// Dalla pagina 2, cambiare la ricerca chiede la pagina 1 solo dopo l'attesa.
+it('waits before asking the API after the search text changes from page 2', async () => {
+  fetch
+    .mockReturnValueOnce(
+      respondWith(ingredients, { current_page: 1, last_page: 3 }),
+    )
+    .mockReturnValueOnce(
+      respondWith(ingredients, { current_page: 2, last_page: 3 }),
+    )
+    .mockReturnValue(respondWith([]))
+
+  render(<IngredientList />)
+  await screen.findByText('Pagina 1 di 3')
+
+  const utente = userEvent.setup()
+  await utente.click(screen.getByRole('button', { name: 'Avanti' }))
+  await screen.findByText('Pagina 2 di 3')
+
+  vi.useFakeTimers()
+  fetch.mockClear()
+
+  fireEvent.change(screen.getByRole('searchbox', { name: 'Cerca' }), {
+    target: { value: 'f' },
+  })
+  expect(fetch).not.toHaveBeenCalled()
+
+  act(() => {
+    vi.advanceTimersByTime(300)
+  })
+  expect(fetch).toHaveBeenCalledTimes(1)
+  expect(fetch).toHaveBeenCalledWith(
+    'http://api.test/api/v1/ingredients?search=f&page=1',
+  )
+})
+
+// Dalla pagina 2, il timer che parte all'apertura non riporta la pagina a 1.
+it('keeps the page after the timer started on mount has ended', async () => {
+  fetch
+    .mockReturnValueOnce(
+      respondWith(ingredients, { current_page: 1, last_page: 3 }),
+    )
+    .mockReturnValueOnce(
+      respondWith(ingredients, { current_page: 2, last_page: 3 }),
+    )
+    .mockReturnValue(
+      respondWith(ingredients, { current_page: 2, last_page: 3 }),
+    )
+
+  render(<IngredientList />)
+  await screen.findByText('Pagina 1 di 3')
+
+  const utente = userEvent.setup()
+  await utente.click(screen.getByRole('button', { name: 'Avanti' }))
+  await screen.findByText('Pagina 2 di 3')
+
+  await new Promise((resolve) => setTimeout(resolve, 400))
+
+  expect(screen.getByText('Pagina 2 di 3')).toBeInTheDocument()
+  expect(fetch).toHaveBeenCalledTimes(2)
+  expect(fetch).toHaveBeenLastCalledWith(
+    'http://api.test/api/v1/ingredients?page=2',
+  )
 })
