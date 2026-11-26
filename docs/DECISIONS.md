@@ -270,6 +270,32 @@ Registrata il 26 novembre 2026, dopo la PR #93 (24 novembre, issue #92).
 
 **Rivalutare se.** La ricerca sembra lenta a chi la usa, una misura con digitazione reale mostra un valore migliore, o il costo della richiesta sul server diventa sensibile e giustifica un'attesa più lunga.
 
+## D-014 — Dependabot e politica delle versioni (livello 1)
+
+Registrata il 26 novembre 2026, dopo la PR #126 (25 novembre, issue #125). Il file `dependabot.yml` è nato con la PR #98.
+
+**Contesto.** Gli avvisi di sicurezza e gli aggiornamenti di versione di Dependabot sono due cose diverse. Il 4 novembre gli aggiornamenti di versione erano spenti di proposito. Accesi senza regole, hanno aperto una PR per pacchetto: dieci unite in una notte, con un massimo predefinito di 5 PR aperte per ecosistema ([riferimento delle opzioni](https://docs.github.com/en/code-security/reference/supply-chain-security/dependabot-options-reference)). Due proposte non erano adatte: MySQL 26.7.0 (#99) e Redis 8.10.2 (#102).
+
+**Opzioni valutate.**
+- Solo avvisi di sicurezza, aggiornamenti di versione spenti (scelta del 4 novembre): scartata il 25 novembre. L'obiettivo è avvicinarsi a un progetto aziendale e vedere tutto il flusso.
+- Settimanale, una PR per pacchetto (la configurazione della PR #98): scartata, troppo rumore.
+- Mensile, con un gruppo per le minor e le patch: **scelta**.
+- MySQL e Redis lasciati liberi: scartata. I salti di versione non sono innocui, come mostrano i due punti sotto.
+
+**Decisione.** Intervallo mensile per tutti gli ecosistemi (frontend, benchmark, backend, GitHub Actions, Docker Compose). Gruppo `minor-and-patch` per npm in `/frontend` e per Composer in `/backend`: le major restano PR singole. Per `docker-compose`, `ignore` su MySQL (major) e su Redis (minor e major).
+- **MySQL resta su 8.4.x.** La pagina «Upgrade Paths» di MySQL 26.7 dice che una versione sequenziale può entrare nel primo ramo a calendario solo dalla 9.7.x LTS: il passo previsto è da 8.4.11 LTS a 9.7.2 LTS.
+- **Redis resta su patch 8.2.x.** Le note della 8.10 si confrontano con la 8.8 e non dicono nulla sulla compatibilità dei dati con versioni più vecchie (nuova codifica «compact hashes»). La CI del backend non avvia Redis, quindi una PR verde non prova nulla su Redis. Le note della 8.2 segnano 8.2.8 e 8.2.9 come SECURITY: le patch vanno seguite.
+- **Revisione di una PR di Dependabot.** Si unisce solo con la CI verde sul commit attuale e un diff limitato al pacchetto e alle sue dipendenze dirette. Se si muovono altri pacchetti (Composer lo fa a cascata), vanno nel corpo del messaggio di squash. Se due PR toccano lo stesso lockfile, si aspetta il rebase automatico, o `@dependabot rebase`.
+
+**Conseguenze.**
+- Il contenitore Redis in esecuzione non cambia finché non viene ricreato: l'immagine nuova arriva alla prossima ricreazione.
+- Playwright (PR #103) resta fermo fino alla release `v0.1.0`, perché cambierebbe il Chromium delle misure del Livello 1.
+- Gli avvisi di sicurezza restano come prima.
+
+**Non verificato.** Se esiste l'immagine `mysql:9.7` e quali sono le date di supporto di 8.4 e 9.7. Le note di Redis 8.2.10: non erano sulla pagina letta.
+
+**Rivalutare se.** Esce una MySQL 9.7 LTS con immagine e date di supporto verificate (il passaggio sarà un lavoro a parte, con backup del volume e ramo di prova), la serie 8.2 di Redis finisce il supporto o le note dicono qualcosa sulla compatibilità dei dati, oppure il rumore delle PR resta alto anche con i gruppi.
+
 ## Registro
 
 | ID    | Data       | Decisione                               | Livello |
@@ -287,3 +313,4 @@ Registrata il 26 novembre 2026, dopo la PR #93 (24 novembre, issue #92).
 | D-011 | 2026-11-02 | Denaro in centesimi interi               | 1       |
 | D-012 | 2026-11-06 | Paginazione dell'elenco ingredienti      | 1       |
 | D-013 | 2026-11-24 | Attesa di 300 ms prima della ricerca     | 1       |
+| D-014 | 2026-11-25 | Dependabot e politica delle versioni     | 1       |
