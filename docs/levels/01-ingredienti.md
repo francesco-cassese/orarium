@@ -1,5 +1,11 @@
 # Livello 1 — Ingredienti
 
+## In breve
+
+- **Risultato:** l'elenco degli ingredienti con ricerca, prima in versione semplice e poi ottimizzata. Due miglioramenti misurati prima e dopo: la paginazione dell'API e l'attesa prima della ricerca. I numeri sono in [PERFORMANCE.md](../PERFORMANCE.md) e [FRONTEND-PERF.md](../FRONTEND-PERF.md).
+- **Lezione principale:** senza l'attesa, ogni lettera digitata faceva una richiesta. E una misura vale solo se si controlla che l'ambiente sia nello stato di riferimento.
+- **Limite principale:** il server di sviluppo rispondeva a due velocità e non ho capito perché. Le misure sono su un solo computer.
+
 ## Obiettivo
 
 Con questo livello voglio avere la prima funzione vera di Orarium, l'elenco degli ingredienti con ricerca, e misurarla. Prima una versione semplice, marcata dal tag `level-01-naive`, con le misure di partenza. Poi i miglioramenti, uno alla volta, ognuno con la misura prima e dopo, fino alla versione ottimizzata.
