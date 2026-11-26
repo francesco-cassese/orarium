@@ -248,6 +248,28 @@ Registrata il 26 novembre 2026, dopo la PR #84 (6 novembre, issue #83).
 
 **Rivalutare se.** La pagina smette di mostrare il numero di pagine (allora `simplePaginate()` evita il conteggio), il conteggio pesa in modo sensibile su tabelle più grandi, o serve una pagina di più di 100 righe.
 
+## D-013 — Attesa di 300 ms prima della ricerca (livello 1)
+
+Registrata il 26 novembre 2026, dopo la PR #93 (24 novembre, issue #92).
+
+**Contesto.** Ogni tasto nel campo di ricerca faceva partire una richiesta all'API: scrivendo «farina» ne partivano 6 (`docs/FRONTEND-PERF.md`). Le risposte in ritardo erano già scartate, ma le richieste partivano lo stesso.
+
+**Opzioni valutate.**
+- Nessuna attesa: scartata. È il caso misurato sopra, 6 richieste per «farina».
+- Attesa di 300 ms dall'ultimo tasto: **scelta**. Costo: la lista arriva circa 314 ms dopo l'ultimo tasto.
+- Altri valori dell'attesa: non confrontati. La misura digita senza pause e non può dire quale ritardo sia migliore.
+
+**Decisione.** Il campo di ricerca cambia subito il testo che si vede (`search`). La richiesta usa un secondo valore (`debouncedSearch`), che si aggiorna solo dopo 300 ms senza tasti, con `clearTimeout` nella pulizia dell'effetto. Il ritorno alla pagina 1 sta dentro il timer e non in `onChange`: nell'altro modo la pagina cambiava a ogni tasto e partiva una richiesta prima dell'attesa. Il controllo `if (search !== debouncedSearch)` evita il ritorno a pagina 1 quando il timer del montaggio scatta senza un cambio di testo: senza, il test D è rosso con 3 chiamate invece di 2. I 300 ms sono più lunghi della pausa di 100 ms tra due modifiche e più corti di un'attesa che sembri lenta (commento del test B). È una scelta, non un risultato misurato.
+
+**Conseguenze.**
+- Richieste scrivendo «farina»: da 6 a 1, in tutte le corse (`docs/FRONTEND-PERF.md`).
+- Tempo dal tasto `f` alla lista: da 78,8 a 392,9 ms, cioè circa 314 ms in più, coerenti con i 300 ms.
+- Il test B controlla il valore esatto: nessuna richiesta a 299 ms, una a 300 ms. Cambiare l'attesa richiede di cambiare anche il test.
+- Non misurato: il risparmio sul server, e l'effetto con una digitazione reale, con pause diverse.
+- Test non scritti: smontaggio del componente con un timer in corso, e testo riportato uguale entro l'attesa.
+
+**Rivalutare se.** La ricerca sembra lenta a chi la usa, una misura con digitazione reale mostra un valore migliore, o il costo della richiesta sul server diventa sensibile e giustifica un'attesa più lunga.
+
 ## Registro
 
 | ID    | Data       | Decisione                               | Livello |
@@ -264,3 +286,4 @@ Registrata il 26 novembre 2026, dopo la PR #84 (6 novembre, issue #83).
 | D-010 | 2026-11-02 | Database dei test: MySQL                 | 1       |
 | D-011 | 2026-11-02 | Denaro in centesimi interi               | 1       |
 | D-012 | 2026-11-06 | Paginazione dell'elenco ingredienti      | 1       |
+| D-013 | 2026-11-24 | Attesa di 300 ms prima della ricerca     | 1       |
