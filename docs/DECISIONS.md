@@ -74,11 +74,11 @@ computer di sviluppo e, in seguito, nella CI. Le versioni fluttuanti (`latest`) 
 - Database e Redis installati direttamente sul sistema operativo: scartata, dipende dalla macchina.
 - Laravel in un contenitore Docker: scartata per ora, aggiunge un livello tra l'editor e il codice. Si può rivalutare.
 - Immagine con tag generico (`redis:8`, `redis:latest`): scartata, la versione cambia nel tempo.
-- Immagine con patch fissata (`redis:8.2.6`): **scelta**, come già fatto per MySQL.
+- Immagine con patch fissata (all'inizio `redis:8.2.6`): **scelta**, come già fatto per MySQL.
 - Client PHP `phpredis` (estensione in C): scartata per ora, perché richiede l'installazione dell'estensione, che non è presente sull'ambiente di sviluppo.
 - Client PHP `predis` (libreria pura PHP): **scelta**, perché funziona senza compilazioni.
 
-**Decisione.** Redis gira in Docker con l'immagine `redis:8.2.6`, definita in `compose.yaml`, con la porta
+**Decisione.** Redis gira in Docker con l'immagine `redis:8.2.10`, definita in `compose.yaml`, con la porta
 `6379` legata a `127.0.0.1`, quindi non raggiungibile dalla rete locale, un volume `redis_data` e un healthcheck con `redis-cli ping`.
 
 Il client PHP usato da Laravel è **predis** (`predis/predis` in `composer.json`, `REDIS_CLIENT=predis` nel `.env`),
@@ -95,6 +95,7 @@ documentano le variabili con valori vuoti per le password.
 
 **Conseguenze.** Ogni aggiornamento di Redis o MySQL richiede una modifica esplicita del tag e una verifica dei test.
 Il servizio Redis non ha password: va bene in locale, ma non va esposto in rete.
+Dal 25 novembre 2026 le patch arrivano da Dependabot, con le regole di D-014.
 
 **Rivalutare se.** Esce una patch di sicurezza per le versioni in uso, il progetto passa a un ambiente non locale,
 oppure avviare Laravel in locale diventa troppo complicato da mantenere.
@@ -226,6 +227,76 @@ test che richiedono proprio SQLite.
 
 **Rivalutare se.** Servono più valute, oppure serve usare direttamente prezzi inferiori al centesimo per unità. In quel caso si valuta una precisione più fine, per esempio millesimi di centesimo in una colonna `price_milli_cents`: più scomoda, ma senza perdita.
 
+## D-012 — Paginazione dell'elenco degli ingredienti (livello 1)
+
+Registrata il 26 novembre 2026, dopo la PR #84 (6 novembre, issue #83).
+
+**Contesto.** L'elenco restituiva tutte le righe. Con 20.000 righe la richiesta costava 574,3 ms e 1.325,1 KB (`docs/PERFORMANCE.md`), e il frontend le mostrava tutte. La guida [Eloquent API Resources](https://laravel.com/docs/13.x/eloquent-resources#pagination) di Laravel suggerisce `paginate()`, che aggiunge `meta` e `links`.
+
+**Opzioni valutate.**
+- Nessuna paginazione: scartata, è il caso misurato sopra.
+- `simplePaginate()`: scartata. Non conta le righe e non produce `last_page`, quindi la pagina non potrebbe scrivere «Pagina N di M».
+- `paginate()`: **scelta**. Costo: una query di conteggio a ogni richiesta.
+
+**Decisione.** L'API accetta `page` e `per_page`. `per_page` vale 50 di default, da 1 a 100, altrimenti 422. L'ordine è per `id`. La risposta ha `data`, `links` e `meta`, e `withQueryString()` mantiene `search` e `per_page` nei link (test: `IngredientPaginationTest`, «it keeps the search text and per_page in the pagination links»). Il massimo di 100 impedisce a una sola richiesta di scaricare l'intera tabella. Motivo non annotato allora, ricordato dopo (25 novembre 2026).
+
+**Conseguenze.**
+- Una query di conteggio a ogni richiesta: 2,12 ms sull'elenco e 4,74 ms sulla ricerca, contro 1,99 e 2,78 ms per le prime 50 righe. Nella ricerca il conteggio costa più delle righe.
+- L'indirizzo senza parametri passa da 20.000 righe a 50: le misure prima e dopo non sono confrontabili alla pari.
+- Il frontend usa solo `meta.current_page` e `meta.last_page`, non `meta.total`.
+- Tra la PR #84 e la PR #86, che aggiunge il paginatore, l'elenco mostra solo le prime 50 righe senza modo di vedere le altre. Accettato: non c'è ancora un deploy.
+- Non misurato: `per_page=100`, e il costo del conteggio su tabelle più grandi di 20.000 righe.
+
+**Rivalutare se.** La pagina smette di mostrare il numero di pagine (allora `simplePaginate()` evita il conteggio), il conteggio pesa in modo sensibile su tabelle più grandi, o serve una pagina di più di 100 righe.
+
+## D-013 — Attesa di 300 ms prima della ricerca (livello 1)
+
+Registrata il 26 novembre 2026, dopo la PR #93 (24 novembre, issue #92).
+
+**Contesto.** Ogni tasto nel campo di ricerca faceva partire una richiesta all'API: scrivendo «farina» ne partivano 6 (`docs/FRONTEND-PERF.md`). Le risposte in ritardo erano già scartate, ma le richieste partivano lo stesso.
+
+**Opzioni valutate.**
+- Nessuna attesa: scartata. È il caso misurato sopra, 6 richieste per «farina».
+- Attesa di 300 ms dall'ultimo tasto: **scelta**. Costo: la lista arriva circa 314 ms dopo l'ultimo tasto.
+- Altri valori dell'attesa: non confrontati. La misura digita senza pause e non può dire quale ritardo sia migliore.
+
+**Decisione.** Il campo di ricerca cambia subito il testo che si vede (`search`). La richiesta usa un secondo valore (`debouncedSearch`), che si aggiorna solo dopo 300 ms senza tasti, con `clearTimeout` nella pulizia dell'effetto. Il ritorno alla pagina 1 sta dentro il timer e non in `onChange`: nell'altro modo la pagina cambiava a ogni tasto e partiva una richiesta prima dell'attesa. Il controllo `if (search !== debouncedSearch)` evita il ritorno a pagina 1 quando il timer del montaggio scatta senza un cambio di testo: senza, il test D è rosso con 3 chiamate invece di 2. I 300 ms sono più lunghi della pausa di 100 ms tra due modifiche e più corti di un'attesa che sembri lenta (commento del test B). È una scelta, non un risultato misurato.
+
+**Conseguenze.**
+- Richieste scrivendo «farina»: da 6 a 1, in tutte le corse (`docs/FRONTEND-PERF.md`).
+- Tempo dal tasto `f` alla lista: da 78,8 a 392,9 ms, cioè circa 314 ms in più, coerenti con i 300 ms.
+- Il test B controlla il valore esatto: nessuna richiesta a 299 ms, una a 300 ms. Cambiare l'attesa richiede di cambiare anche il test.
+- Non misurato: il risparmio sul server, e l'effetto con una digitazione reale, con pause diverse.
+- Test non scritti: smontaggio del componente con un timer in corso, e testo riportato uguale entro l'attesa.
+
+**Rivalutare se.** La ricerca sembra lenta a chi la usa, una misura con digitazione reale mostra un valore migliore, o il costo della richiesta sul server diventa sensibile e giustifica un'attesa più lunga.
+
+## D-014 — Dependabot e politica delle versioni (livello 1)
+
+Registrata il 26 novembre 2026, dopo la PR #126 (25 novembre, issue #125). Il file `dependabot.yml` è nato con la PR #98.
+
+**Contesto.** Gli avvisi di sicurezza e gli aggiornamenti di versione di Dependabot sono due cose diverse. Il 4 novembre gli aggiornamenti di versione erano spenti di proposito. Accesi senza regole, hanno aperto una PR per pacchetto: dieci unite in una notte, con un massimo predefinito di 5 PR aperte per ecosistema ([riferimento delle opzioni](https://docs.github.com/en/code-security/reference/supply-chain-security/dependabot-options-reference)). Due proposte non erano adatte: MySQL 26.7.0 (#99) e Redis 8.10.2 (#102).
+
+**Opzioni valutate.**
+- Solo avvisi di sicurezza, aggiornamenti di versione spenti (scelta del 4 novembre): scartata il 25 novembre. L'obiettivo è avvicinarsi a un progetto aziendale e vedere tutto il flusso.
+- Settimanale, una PR per pacchetto (la configurazione della PR #98): scartata, troppo rumore.
+- Mensile, con un gruppo per le minor e le patch: **scelta**.
+- MySQL e Redis lasciati liberi: scartata. I salti di versione non sono innocui, come mostrano i due punti sotto.
+
+**Decisione.** Intervallo mensile per tutti gli ecosistemi (frontend, benchmark, backend, GitHub Actions, Docker Compose). Gruppo `minor-and-patch` per npm in `/frontend` e per Composer in `/backend`: le major restano PR singole. Per `docker-compose`, `ignore` su MySQL (major) e su Redis (minor e major).
+- **MySQL resta su 8.4.x.** La pagina «Upgrade Paths» di MySQL 26.7 dice che una versione sequenziale può entrare nel primo ramo a calendario solo dalla 9.7.x LTS: il passo previsto è da 8.4.11 LTS a 9.7.2 LTS.
+- **Redis resta su patch 8.2.x.** Le note della 8.10 si confrontano con la 8.8 e non dicono nulla sulla compatibilità dei dati con versioni più vecchie (nuova codifica «compact hashes»). La CI del backend non avvia Redis, quindi una PR verde non prova nulla su Redis. Le note della 8.2 segnano 8.2.8 e 8.2.9 come SECURITY: le patch vanno seguite.
+- **Revisione di una PR di Dependabot.** Si unisce solo con la CI verde sul commit attuale e un diff limitato al pacchetto e alle sue dipendenze dirette. Se si muovono altri pacchetti (Composer lo fa a cascata), vanno nel corpo del messaggio di squash. Se due PR toccano lo stesso lockfile, si aspetta il rebase automatico, o `@dependabot rebase`.
+
+**Conseguenze.**
+- Il contenitore Redis in esecuzione non cambia finché non viene ricreato: l'immagine nuova arriva alla prossima ricreazione.
+- Playwright (PR #103) resta fermo fino alla release `v0.1.0`, perché cambierebbe il Chromium delle misure del Livello 1.
+- Gli avvisi di sicurezza restano come prima.
+
+**Non verificato.** Se esiste l'immagine `mysql:9.7` e quali sono le date di supporto di 8.4 e 9.7. Le note di Redis 8.2.10: non erano sulla pagina letta.
+
+**Rivalutare se.** Esce una MySQL 9.7 LTS con immagine e date di supporto verificate (il passaggio sarà un lavoro a parte, con backup del volume e ramo di prova), la serie 8.2 di Redis finisce il supporto o le note dicono qualcosa sulla compatibilità dei dati, oppure il rumore delle PR resta alto anche con i gruppi.
+
 ## Registro
 
 | ID    | Data       | Decisione                               | Livello |
@@ -241,3 +312,6 @@ test che richiedono proprio SQLite.
 | D-009 | 2026-11-01 | Workflow di CI del backend               | 0       |
 | D-010 | 2026-11-02 | Database dei test: MySQL                 | 1       |
 | D-011 | 2026-11-02 | Denaro in centesimi interi               | 1       |
+| D-012 | 2026-11-06 | Paginazione dell'elenco ingredienti      | 1       |
+| D-013 | 2026-11-24 | Attesa di 300 ms prima della ricerca     | 1       |
+| D-014 | 2026-11-25 | Dependabot e politica delle versioni     | 1       |
