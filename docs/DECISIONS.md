@@ -297,6 +297,27 @@ Registrata il 26 novembre 2026, dopo la PR #126 (25 novembre, issue #125). Il fi
 
 **Rivalutare se.** Esce una MySQL 9.7 LTS con immagine e date di supporto verificate (il passaggio sarà un lavoro a parte, con backup del volume e ramo di prova), la serie 8.2 di Redis finisce il supporto o le note dicono qualcosa sulla compatibilità dei dati, oppure il rumore delle PR resta alto anche con i gruppi.
 
+## D-015 — Il paginatore dentro un `<nav>` con etichetta (livello 1)
+
+Registrata il 26 novembre 2026, con l'issue #142.
+
+**Contesto.** Il paginatore (il testo «Pagina N di M» e i pulsanti Indietro e Avanti) non era un punto di riferimento (*landmark*) della pagina. Nell'esercizio 01 del laboratorio (`accessibilita/01-punti-di-riferimento`, in orarium-lab) ho letto la guida del W3C sui landmark, la pagina MDN su `<nav>` e la pagina Pagination di Bootstrap. Il W3C porta come esempio due gruppi identici di controlli di paginazione, sopra e sotto una tabella, ognuno in una regione di navigazione con la stessa etichetta. Bootstrap consiglia un `<nav>` che avvolge la paginazione, con un `aria-label` descrittivo. Le tre pagine parlano di collegamenti; il paginatore di Orarium ha due pulsanti.
+
+**Opzioni valutate.**
+- `<nav aria-label="Paginazione">` intorno al testo e ai due pulsanti: **scelta**.
+- Nessun `<nav>`, il paginatore resta com'è: scartata.
+- Collegamenti con indirizzi veri (per esempio `?page=2`) dentro il `<nav>`, con `aria-current="page"` sulla pagina corrente: scartata per ora. Cambia il comportamento della pagina e i test, e prima serve un esercizio nel laboratorio su `aria-current`.
+
+**Decisione.** `Pagination` restituisce un `<nav aria-label="Paginazione">` che contiene il testo e i due pulsanti. L'etichetta non ripete la parola «navigazione», come chiede il W3C: lo screen reader aggiunge il ruolo da solo. Motivo, di Francesco: «come dice la documentazione».
+
+**Conseguenze.**
+- `Pagination.test.jsx` ha un test che cerca la navigazione per ruolo e nome e controlla che i due pulsanti siano dentro; l'ho visto fallire prima della modifica. I test esistenti cercano i pulsanti per ruolo e nome e non sono cambiati.
+- Nella pagina c'è un solo `<nav>`: secondo il W3C l'etichetta non sarebbe obbligatoria. C'è comunque, perché Bootstrap la consiglia per ogni paginazione.
+
+**Non verificato.** Come lo legge uno screen reader: non l'ho provato con uno screen reader vero. Se l'aspetto della pagina cambia: non l'ho guardato nel browser. Le pagine lette descrivono collegamenti, non pulsanti.
+
+**Rivalutare se.** Il paginatore diventa una lista di collegamenti con indirizzi (allora serve `aria-current="page"`), oppure una prova con uno screen reader mostra che questa struttura non aiuta.
+
 ## Registro
 
 | ID    | Data       | Decisione                               | Livello |
@@ -315,3 +336,4 @@ Registrata il 26 novembre 2026, dopo la PR #126 (25 novembre, issue #125). Il fi
 | D-012 | 2026-11-06 | Paginazione dell'elenco ingredienti      | 1       |
 | D-013 | 2026-11-24 | Attesa di 300 ms prima della ricerca     | 1       |
 | D-014 | 2026-11-25 | Dependabot e politica delle versioni     | 1       |
+| D-015 | 2026-11-26 | Paginatore dentro un nav con etichetta   | 1       |
