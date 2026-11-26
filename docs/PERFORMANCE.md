@@ -248,7 +248,7 @@ Ambiente, dataset, metodo e regola di validità sono quelli del Level 1: stesso 
 | Ricerca "farina", p95 | 168,2 ms | 163,5 ms |
 | Ricerca "farina", dati per richiesta | 31,8 KB | 5,1 KB |
 
-Le mediane sono la mediana delle 6 mediane di giro; il costo fisso del server (health) è circa 99 ms.
+Le mediane sono la mediana delle 6 mediane di giro, compreso il primo. La tabella dei risultati del Livello 1 scarta invece il primo giro come riscaldamento e usa le corse 2–6. Per questo il «Prima» di questa tabella differisce da quella baseline: elenco 574,3 ms qui e 573,7 ms là (p95 608,5 e 609,7 ms), ricerca 141,1 ms qui e 141,2 ms là (p95 168,2 e 167,6 ms). Sono gli stessi dati, calcolati in due modi, e la conclusione non cambia. Il costo fisso del server (health) è circa 99 ms.
 
 Misura senza server web (`benchmarks/profile-list.php`, 3 corse, mediane in ms):
 
