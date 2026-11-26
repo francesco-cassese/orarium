@@ -57,7 +57,7 @@ Tutte le decisioni sono in [DECISIONS.md](../DECISIONS.md). Quelle di questo liv
 I numeri non sono ricopiati qui: stanno nei due documenti delle prestazioni, che spiegano anche ambiente e metodo.
 
 - Endpoint dell'elenco: [PERFORMANCE.md](../PERFORMANCE.md), sezioni «Livello 1», «Dopo la paginazione dell'elenco» e «Indagine: il server di sviluppo a due velocità».
-- Pagina dell'elenco: [FRONTEND-PERF.md](../FRONTEND-PERF.md), sezioni «Livello 1» (versione semplice, paginatore e attesa prima della ricerca).
+- Pagina dell'elenco: [FRONTEND-PERF.md](../FRONTEND-PERF.md), sezioni «Livello 1» (versione semplice, paginatore e attesa prima della ricerca) e la serie finale con il Chromium di Playwright 1.65.1.
 
 In breve: la paginazione ha ridotto sia il tempo dell'elenco sia i dati per richiesta, e l'attesa prima della ricerca ha ridotto il numero di richieste mentre si scrive. Le misure del 5 novembre, prese prima della regola di controllo del server, non sono una baseline: sono state rifatte il 6 novembre.
 
@@ -107,4 +107,4 @@ Non ho trovato test per:
 
 ## Prossimo livello
 
-Il Livello 2 non è ancora pianificato. Questo livello è chiuso, con il tag `level-01-optimized` e il rilascio `v0.1.0`. Prima di cominciare il Livello 2 va rifatta la misura finale del Livello 1 con il nuovo Chromium di Playwright 1.65.1, perché le misure dei due livelli siano confrontabili (D-014).
+Il Livello 2 non è ancora pianificato. Questo livello è chiuso, con il tag `level-01-optimized` e il rilascio `v0.1.0`. La misura finale della pagina è stata rifatta con il nuovo Chromium di Playwright 1.65.1, perché le misure dei due livelli siano confrontabili (D-014).
