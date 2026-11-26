@@ -226,6 +226,28 @@ test che richiedono proprio SQLite.
 
 **Rivalutare se.** Servono più valute, oppure serve usare direttamente prezzi inferiori al centesimo per unità. In quel caso si valuta una precisione più fine, per esempio millesimi di centesimo in una colonna `price_milli_cents`: più scomoda, ma senza perdita.
 
+## D-012 — Paginazione dell'elenco degli ingredienti (livello 1)
+
+Registrata il 26 novembre 2026, dopo la PR #84 (6 novembre, issue #83).
+
+**Contesto.** L'elenco restituiva tutte le righe. Con 20.000 righe la richiesta costava 574,3 ms e 1.325,1 KB (`docs/PERFORMANCE.md`), e il frontend le mostrava tutte. La guida [Eloquent API Resources](https://laravel.com/docs/13.x/eloquent-resources#pagination) di Laravel suggerisce `paginate()`, che aggiunge `meta` e `links`.
+
+**Opzioni valutate.**
+- Nessuna paginazione: scartata, è il caso misurato sopra.
+- `simplePaginate()`: scartata. Non conta le righe e non produce `last_page`, quindi la pagina non potrebbe scrivere «Pagina N di M».
+- `paginate()`: **scelta**. Costo: una query di conteggio a ogni richiesta.
+
+**Decisione.** L'API accetta `page` e `per_page`. `per_page` vale 50 di default, da 1 a 100, altrimenti 422. L'ordine è per `id`. La risposta ha `data`, `links` e `meta`, e `withQueryString()` mantiene `search` e `per_page` nei link (test: `IngredientPaginationTest`, «it keeps the search text and per_page in the pagination links»). Il massimo di 100 impedisce a una sola richiesta di scaricare l'intera tabella. Motivo non annotato allora, ricordato dopo (25 novembre 2026).
+
+**Conseguenze.**
+- Una query di conteggio a ogni richiesta: 2,12 ms sull'elenco e 4,74 ms sulla ricerca, contro 1,99 e 2,78 ms per le prime 50 righe. Nella ricerca il conteggio costa più delle righe.
+- L'indirizzo senza parametri passa da 20.000 righe a 50: le misure prima e dopo non sono confrontabili alla pari.
+- Il frontend usa solo `meta.current_page` e `meta.last_page`, non `meta.total`.
+- Tra la PR #84 e la PR #86, che aggiunge il paginatore, l'elenco mostra solo le prime 50 righe senza modo di vedere le altre. Accettato: non c'è ancora un deploy.
+- Non misurato: `per_page=100`, e il costo del conteggio su tabelle più grandi di 20.000 righe.
+
+**Rivalutare se.** La pagina smette di mostrare il numero di pagine (allora `simplePaginate()` evita il conteggio), il conteggio pesa in modo sensibile su tabelle più grandi, o serve una pagina di più di 100 righe.
+
 ## Registro
 
 | ID    | Data       | Decisione                               | Livello |
@@ -241,3 +263,4 @@ test che richiedono proprio SQLite.
 | D-009 | 2026-11-01 | Workflow di CI del backend               | 0       |
 | D-010 | 2026-11-02 | Database dei test: MySQL                 | 1       |
 | D-011 | 2026-11-02 | Denaro in centesimi interi               | 1       |
+| D-012 | 2026-11-06 | Paginazione dell'elenco ingredienti      | 1       |
