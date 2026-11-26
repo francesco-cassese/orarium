@@ -78,7 +78,7 @@ Questa mappa è stata fatta leggendo i nomi dei test in `main`, non eseguendoli.
 | Database dei test | `TestDatabaseTest`: MySQL 8.4 e database dedicato |
 | Chiamata all'API | `ingredients.test.js`: parametri `search` e `page`, pagina 1 di default, testo con spazio codificato, solo `data` e `meta` restituiti, errore con lo stato |
 | Elenco nella pagina | `IngredientList.test.jsx`: tabella, «pz», caricamento, errore, ricerca |
-| Paginatore | `IngredientList.test.jsx`: pagina corrente e ultima, Indietro e Avanti disabilitati ai bordi, richiesta della pagina successiva e di quella precedente, ritorno a pagina 1 quando cambia la ricerca; `Pagination.test.jsx`: Avanti disabilitato oltre l'ultima pagina |
+| Paginatore | `IngredientList.test.jsx`: pagina corrente e ultima, Indietro e Avanti disabilitati ai bordi, richiesta della pagina successiva e di quella precedente, ritorno a pagina 1 quando cambia la ricerca; `Pagination.test.jsx`: Avanti disabilitato oltre l'ultima pagina e Indietro disabilitato prima della prima (aggiunto con la #140, dopo la chiusura del livello) |
 | Attesa prima della ricerca | `IngredientList.test.jsx`: nessuna richiesta mentre si scrive, una sola richiesta per il testo finale, attesa anche dalla pagina 2, pagina mantenuta dopo il timer avviato al montaggio |
 
 Non ho trovato test per:
@@ -100,7 +100,7 @@ Non ho trovato test per:
 - I 300 ms dell'attesa sono una scelta, non un risultato misurato (D-013).
 - `per_page=100` non è stato misurato, e il costo della query di conteggio è misurato solo sulla tabella del seeder.
 - I test non coprono il browser vero e l'elenco con una sola pagina (vedi «Test»).
-- Il pulsante Indietro si disabilita con `=== 1`: da valutare come fa Avanti dopo la #96.
+- Il pulsante Indietro si disabilitava con `=== 1`, a differenza di Avanti dopo la #96. Corretto dopo la chiusura del livello, con `<= 1` e un test (#140); non era raggiungibile dall'interfaccia.
 - Il paginatore non è in un elemento `<nav>` accessibile e i pulsanti non hanno uno stile mio.
 - Prima di un deploy vanno ancora verificati il CORS e la licenza, e non ci sono `composer audit` e `pnpm audit` nei workflow.
 - Il linguaggio del frontend resta JavaScript: D-006 (TypeScript) è da rivalutare.

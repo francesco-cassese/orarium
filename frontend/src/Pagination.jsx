@@ -14,7 +14,7 @@ function Pagination({ currentPage, lastPage, onPageChange }) {
       </p>
       <button
         type="button"
-        disabled={currentPage === 1}
+        disabled={currentPage <= 1}
         onClick={() => onPageChange(currentPage - 1)}
       >
         Indietro
