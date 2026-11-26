@@ -8,6 +8,14 @@ Pianificazione di produzione e scorte per laboratori alimentari.
 Orarium aiuta un laboratorio a organizzare il lavoro e a tenere sotto controllo il magazzino:
 dagli ordini dei clienti al piano di produzione, e dalle scorte alla tracciabilità dei lotti.
 
+## In breve
+
+Orarium è un progetto di studio: lo costruisco un livello alla volta e misuro ogni miglioramento. Risultati del Livello 1, l'elenco degli ingredienti con 20.000 righe di prova:
+
+- **Paginazione dell'API:** la richiesta dell'elenco passa da circa 574 ms a circa 139 ms, e da circa 1.325 KB a circa 5 KB ([misure](docs/PERFORMANCE.md#dopo-la-paginazione-dellelenco-issue-83)).
+- **Attesa prima della ricerca:** scrivendo «farina» le richieste all'API passano da 6 a 1 ([misure](docs/FRONTEND-PERF.md#livello-1-ricerca-con-attesa-prima-della-richiesta-issue-92)).
+- **Limiti:** le misure sono su un solo computer, e il server di sviluppo rispondeva a due velocità senza che io abbia capito perché ([indagine](docs/PERFORMANCE.md#indagine-il-server-di-sviluppo-a-due-velocità-issue-77)).
+
 ## Come nasce questo progetto
 
 Sto costruendo Orarium **un livello alla volta**, per imparare a fondo
