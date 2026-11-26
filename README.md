@@ -28,11 +28,15 @@ La storia del progetto è nella cronologia dei commit, nelle issue e nelle pull 
 **Livello 0 — Fondamenta**, completato con il rilascio [`v0.0.1`](https://github.com/francesco-cassese/orarium/releases/tag/v0.0.1). Il documento del livello è in [`docs/levels/00-fondamenta.md`](docs/levels/00-fondamenta.md).
 
 - Completato: struttura del repository, processo di lavoro, modelli di issue e pull request, decisioni tecniche, backend Laravel di base, ambiente di sviluppo con MySQL e Redis in Docker, strumenti di qualità del backend (Pest, Pint, Larastan), frontend React di base (Vite), strumenti di qualità del frontend (ESLint, Prettier, Vitest), CI di frontend e backend (GitHub Actions), con i controlli richiesti prima del merge, baseline di prestazioni del backend e del frontend registrate in [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md) e [`docs/FRONTEND-PERF.md`](docs/FRONTEND-PERF.md).
-- In corso: Livello 1 (milestone `L01 Ingredients`). Fatta la versione semplice, marcata dal tag `level-01-naive`: endpoint e pagina dell'elenco degli ingredienti, seeder con dati coerenti e misure di partenza dell'endpoint (`docs/PERFORMANCE.md`) e della pagina (`docs/FRONTEND-PERF.md`), rifatte con una regola di controllo del server. Fatte poi la paginazione dell'API (#84), il paginatore nella pagina (#86) e l'attesa prima della ricerca (#93), con le misure negli stessi due documenti.
+
+**Livello 1 — Ingredienti**, completato con il rilascio [`v0.1.0`](https://github.com/francesco-cassese/orarium/releases/tag/v0.1.0). Il documento del livello è in [`docs/levels/01-ingredienti.md`](docs/levels/01-ingredienti.md).
+
+- Completato: la versione semplice, marcata dal tag `level-01-naive` (endpoint e pagina dell'elenco degli ingredienti, seeder con dati coerenti, misure di partenza dell'endpoint e della pagina, rifatte con una regola di controllo del server) e i miglioramenti: paginazione dell'API (#84), paginatore nella pagina (#86) e attesa prima della ricerca (#93). La versione ottimizzata è marcata dal tag `level-01-optimized`. Le misure sono in [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md) e [`docs/FRONTEND-PERF.md`](docs/FRONTEND-PERF.md).
 
 ## Cosa guardare
 
 - [Documento del Livello 0](docs/levels/00-fondamenta.md): cosa ho fatto, cosa ho imparato e i limiti delle misure.
+- [Documento del Livello 1](docs/levels/01-ingredienti.md): cosa ho fatto, la mappa dei test, cosa ho imparato e i limiti.
 - [Decisioni tecniche](docs/DECISIONS.md): perché ogni scelta, con le alternative scartate.
 - [Misure di partenza](docs/PERFORMANCE.md): metodo e risultati ripetibili.
 - [Pull request chiuse](https://github.com/francesco-cassese/orarium/pulls?q=is%3Apr+is%3Aclosed): il processo di lavoro, una modifica alla volta.
