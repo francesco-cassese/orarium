@@ -9,3 +9,4 @@
 | [PERFORMANCE.md](PERFORMANCE.md) | Baseline del backend (Livello 0), dell'endpoint dell'elenco ingredienti (Livello 1) e misure dopo la paginazione: ambiente, metodo, risultati e limiti delle misure |
 | [FRONTEND-PERF.md](FRONTEND-PERF.md) | Baseline del frontend (Livello 0: peso del bundle) e misure della pagina dell'elenco (Livello 1): baseline, paginatore e attesa prima della ricerca, con ambiente, metodo, risultati e limiti |
 | [levels/00-fondamenta.md](levels/00-fondamenta.md) | Documento del Livello 0: obiettivo, cosa è stato fatto, decisioni, misure, cosa ho imparato, limiti |
+| [levels/01-ingredienti.md](levels/01-ingredienti.md) | Documento del Livello 1: obiettivo, cosa è stato fatto, decisioni, misure, mappa dei test, cosa ho imparato, limiti |
