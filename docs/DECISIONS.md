@@ -74,11 +74,11 @@ computer di sviluppo e, in seguito, nella CI. Le versioni fluttuanti (`latest`) 
 - Database e Redis installati direttamente sul sistema operativo: scartata, dipende dalla macchina.
 - Laravel in un contenitore Docker: scartata per ora, aggiunge un livello tra l'editor e il codice. Si può rivalutare.
 - Immagine con tag generico (`redis:8`, `redis:latest`): scartata, la versione cambia nel tempo.
-- Immagine con patch fissata (`redis:8.2.6`): **scelta**, come già fatto per MySQL.
+- Immagine con patch fissata (all'inizio `redis:8.2.6`): **scelta**, come già fatto per MySQL.
 - Client PHP `phpredis` (estensione in C): scartata per ora, perché richiede l'installazione dell'estensione, che non è presente sull'ambiente di sviluppo.
 - Client PHP `predis` (libreria pura PHP): **scelta**, perché funziona senza compilazioni.
 
-**Decisione.** Redis gira in Docker con l'immagine `redis:8.2.6`, definita in `compose.yaml`, con la porta
+**Decisione.** Redis gira in Docker con l'immagine `redis:8.2.10`, definita in `compose.yaml`, con la porta
 `6379` legata a `127.0.0.1`, quindi non raggiungibile dalla rete locale, un volume `redis_data` e un healthcheck con `redis-cli ping`.
 
 Il client PHP usato da Laravel è **predis** (`predis/predis` in `composer.json`, `REDIS_CLIENT=predis` nel `.env`),
@@ -95,6 +95,7 @@ documentano le variabili con valori vuoti per le password.
 
 **Conseguenze.** Ogni aggiornamento di Redis o MySQL richiede una modifica esplicita del tag e una verifica dei test.
 Il servizio Redis non ha password: va bene in locale, ma non va esposto in rete.
+Dal 25 novembre 2026 le patch arrivano da Dependabot, con le regole di D-014.
 
 **Rivalutare se.** Esce una patch di sicurezza per le versioni in uso, il progetto passa a un ambiente non locale,
 oppure avviare Laravel in locale diventa troppo complicato da mantenere.
