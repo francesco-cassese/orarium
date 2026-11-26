@@ -232,3 +232,51 @@ Solo fatti.
 
 - `benchmarks/results/level-01/debounce/before/page.json` e `after/page.json`: valori grezzi di tutte le corse e riepilogo.
 - `benchmarks/results/level-01/debounce/before/` e `after/`, file `page-health-before.json` e `page-health-after.json`: i quattro controlli `health`.
+
+## Livello 1: pagina finale con il Chromium di Playwright 1.65.1 (issue #138)
+
+Misura della pagina finale del Livello 1 con il nuovo Chromium, portato da Playwright 1.65.1 (#103). Il codice dell'applicazione non cambia: serve a sapere se il cambio di browser sposta le misure, prima di cominciare il Livello 2 (D-014). Il confronto è con la serie «dopo» della sezione precedente.
+
+### Ambiente
+
+- Data: 2026-11-26, intorno alle 18:36 (ora italiana; in `page.json` è `17:36` UTC).
+- Codice misurato: `main` alla commit `b65a8c1`. Build di produzione (`pnpm build`), servita con `pnpm preview` su `127.0.0.1:4173`. Bundle dall'output della build: 21 moduli; JavaScript 222.05 kB (69.56 kB gzip); CSS 140.73 kB (20.14 kB gzip); HTML 0.45 kB (0.29 kB gzip), uguale alla serie «dopo» della sezione precedente.
+- Browser e Node registrati in `page.json`: Chromium 159.0.8154.6, Node v24.16.0.
+- Backend, letto su questo computer: PHP 8.5.12 con OPcache caricata (`opcache.enable` On, `opcache.enable_cli` Off), Laravel 13.44.1, MySQL 8.4.13 in Docker. Dataset: 20.000 righe, contate con `Ingredient::count()` prima della serie.
+- Condizioni di misura, dichiarate da chi ha misurato e non verificate con uno strumento: durante la serie erano aperti solo Docker Desktop (con il database), VS Code e un terminale.
+- Metodo e script: gli stessi della sezione precedente. Primo tentativo valido.
+
+### Risultati
+
+Cinque corse misurate (la prima è scartata come riscaldamento).
+
+| Misura | 24 nov, Chromium 156 | Min–max | Oggi, Chromium 159 | Min–max |
+|---|---|---|---|---|
+| Richieste scrivendo «farina», per corsa | 1 | 1–1 | 1 | 1–1 |
+| Elenco, `listMs` (mediana) | 134.7 ms | 127.0–151.0 ms | 126.6 ms | 118.7–147.6 ms |
+| Elenco, `listApiMs` (mediana) | 36.7 ms | 33.6–48.7 ms | 36.5 ms | 31.5–47.9 ms |
+| Tasto `f`, `keyMs` (mediana) | 392.9 ms | 359.3–407.8 ms | 396.8 ms | 393.2–409.9 ms |
+| Tasto `f`, `keyApiMs` (mediana) | 53.5 ms | 29.2–57.7 ms | 54.9 ms | 49.6–71.8 ms |
+
+- Controllo `health` (mediana di k6, arrotondata dallo script a un decimale): 7.6 ms prima e 7.6 ms dopo la serie.
+- Righe nella tabella e nodi del DOM: 50 righe e 226 nodi in tutte le corse.
+
+### Lettura
+
+Solo fatti.
+
+- Le richieste scrivendo «farina» sono 1 in tutte le sei corse, la prima scartata inclusa.
+- Per ogni misura gli intervalli min–max delle due serie si sovrappongono: le differenze tra le mediane non si interpretano.
+- Il controllo `health` è nello stesso stato della serie del 24 novembre (circa 7.6 ms).
+
+### Limiti e osservazioni
+
+- Il confronto non isola il Chromium. Rispetto al 24 novembre è cambiato anche Laravel, da 13.39.0 a 13.44.1 secondo `composer.lock` (commit `a2926fd`, 25 novembre). La versione di PHP e lo stato di OPcache del 24 novembre non sono stati registrati, quindi non si sa se siano cambiati.
+- Il nome «stato veloce» (`health` circa 7.6 ms) descrive il valore, non la causa: il perché non è stato indagato. OPcache caricata è un'ipotesi non verificata.
+- Questa serie non è confrontabile con le serie del 6 e 7 novembre di questo livello, dove `health` stava intorno a 98 ms.
+- Tre limiti ereditati: una sola sessione, un solo computer e un solo testo di ricerca.
+
+### File
+
+- `benchmarks/results/level-01/chromium-159/page.json`: valori grezzi di tutte le corse e riepilogo.
+- `benchmarks/results/level-01/chromium-159/page-health-before.json` e `page-health-after.json`: i due controlli `health`.
