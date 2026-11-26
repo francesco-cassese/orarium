@@ -77,7 +77,7 @@ Questa mappa è stata fatta leggendo i nomi dei test in `main`, non eseguendoli.
 
 Non ho trovato test per:
 
-- il comportamento nel browser vero: i test del frontend girano con Vitest e jsdom, e Playwright (PR #103) è fermo fino al rilascio;
+- il comportamento nel browser vero: i test del frontend girano con Vitest e jsdom, e Playwright è nel repository solo per le misure (`benchmarks/page.mjs`), non per i test;
 - un elenco con una sola pagina e l'etichetta «Pagina 1 di 1».
 
 ## Cosa ho imparato
@@ -101,4 +101,4 @@ Non ho trovato test per:
 
 ## Prossimo livello
 
-Il Livello 2 non è ancora pianificato. Prima di cominciare vanno chiusi questo livello, con il tag `level-01-optimized` e il rilascio `v0.1.0`, e la PR #103 su Playwright.
+Il Livello 2 non è ancora pianificato. Questo livello è chiuso, con il tag `level-01-optimized` e il rilascio `v0.1.0`. Prima di cominciare il Livello 2 va rifatta la misura finale del Livello 1 con il nuovo Chromium di Playwright 1.65.1, perché le misure dei due livelli siano confrontabili (D-014).

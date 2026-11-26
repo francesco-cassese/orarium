@@ -290,7 +290,7 @@ Registrata il 26 novembre 2026, dopo la PR #126 (25 novembre, issue #125). Il fi
 
 **Conseguenze.**
 - Il contenitore Redis in esecuzione non cambia finché non viene ricreato: l'immagine nuova arriva alla prossima ricreazione.
-- Playwright (PR #103) resta fermo fino alla release `v0.1.0`, perché cambierebbe il Chromium delle misure del Livello 1.
+- Playwright (PR #103) è rimasto fermo fino alla release `v0.1.0` ed è stato unito il 26 novembre 2026, da 1.64.1 a 1.65.1, perché cambia il Chromium delle misure. Le misure del Livello 1 restano quelle fatte con Chromium 156.0.8078.4. Per il Livello 2 si rifà prima la misura finale del Livello 1 con il nuovo Chromium, che si legge da `page.json`: le note del rilascio 1.65.1 indicano 159.0.8154.6, ma non l'ho verificato su questa macchina.
 - Gli avvisi di sicurezza restano come prima.
 
 **Non verificato.** Se esiste l'immagine `mysql:9.7` e quali sono le date di supporto di 8.4 e 9.7. Le note di Redis 8.2.10: non erano sulla pagina letta.
