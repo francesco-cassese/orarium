@@ -21,3 +21,20 @@ it('disables Previous when the current page is before the first page', () => {
 
   expect(screen.getByRole('button', { name: 'Indietro' })).toBeDisabled()
 })
+
+// I controlli di paginazione stanno in un punto di riferimento con il nome «Paginazione».
+it('wraps the pagination controls in a labelled navigation', () => {
+  const onPageChange = vi.fn()
+  render(
+    <Pagination currentPage={2} lastPage={5} onPageChange={onPageChange} />,
+  )
+
+  const navigazione = screen.getByRole('navigation', { name: 'Paginazione' })
+
+  expect(navigazione).toContainElement(
+    screen.getByRole('button', { name: 'Indietro' }),
+  )
+  expect(navigazione).toContainElement(
+    screen.getByRole('button', { name: 'Avanti' }),
+  )
+})
