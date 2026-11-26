@@ -8,7 +8,7 @@
  */
 function Pagination({ currentPage, lastPage, onPageChange }) {
   return (
-    <>
+    <nav aria-label="Paginazione">
       <p>
         Pagina {currentPage} di {lastPage}
       </p>
@@ -26,7 +26,7 @@ function Pagination({ currentPage, lastPage, onPageChange }) {
       >
         Avanti
       </button>
-    </>
+    </nav>
   )
 }
 export default Pagination
